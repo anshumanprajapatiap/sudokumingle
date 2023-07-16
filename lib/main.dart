@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sudokumingle/providers/darkThemeProvider.dart';
 import 'package:sudokumingle/providers/googleSignInProvider.dart';
-import 'package:sudokumingle/screens/bottomNavigationBar.dart';
 import 'package:sudokumingle/screens/splashScreen.dart';
 
 import 'firebase_options.dart';
@@ -37,7 +36,6 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return Consumer<ThemeSwitchProvider>(
       builder: (context, themeProvider, _) {
-        print('THEME');
         print(themeProvider.getTheme());
         return MaterialApp(
           title: 'My App',

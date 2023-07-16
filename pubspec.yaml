@@ -52,6 +52,10 @@ dependencies:
   cloud_firestore: ^4.7.0
   google_sign_in: ^6.1.0
 
+  uuid: ^3.0.6
+
+  audioplayers: ^0.20.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -77,6 +81,9 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/carosuelBGImage.png
+    - assets/audio/alert_sound.mp3
+    - assets/images/avatar/
+    - assets/images/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

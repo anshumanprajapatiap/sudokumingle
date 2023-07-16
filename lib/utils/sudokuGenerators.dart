@@ -18,6 +18,7 @@ class SudokuGenerators {
     return rtn;
   }
 
+
   static Map<String, dynamic> generateSudoku(String difficulty) {
     List<List<int>> correctSudoku =
     List.generate(9, (i) => List.generate(9, (j) => 0));
@@ -54,6 +55,7 @@ class SudokuGenerators {
         break;
     }
 
+    print('db string : ${correctSudoku}');
     // Generate toBeSolvedSudoku based on difficulty level
     int count = 0;
     while (count < numValues) {
@@ -65,19 +67,29 @@ class SudokuGenerators {
       }
     }
 
+    print('correctSudoku ${correctSudoku}');
+    print('toBeSolvedSudoku ${toBeSolvedSudoku}');
     return {
       'correctSudoku': correctSudoku,
       'toBeSolvedSudoku': toBeSolvedSudoku,
       'difficulty': difficulty
     };
   }
+
 }
 
-// void main() {
-//   Map<String, dynamic> rtn =
-//   SudokuGenerators.generateSudoku('medium');
-//
-//   print(rtn['correctSudoku']);
-//   print(rtn['toBeSolvedSudoku']);
-//   print(rtn['difficulty']);
-// }
+void printGrid(List<List<int?>> grid) {
+  for (final row in grid) {
+    print(row);
+  }
+}
+
+
+void main() {
+  Map<String, dynamic> rtn =
+  SudokuGenerators.generateSudoku('medium');
+
+  printGrid(rtn['correctSudoku']);
+  printGrid(rtn['toBeSolvedSudoku']);
+  print(rtn['difficulty']);
+}

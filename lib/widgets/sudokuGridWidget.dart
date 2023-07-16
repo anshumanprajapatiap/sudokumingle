@@ -1,12 +1,17 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:sudokumingle/screens/praticeOfflineScreen.dart';
+import 'package:sudokumingle/utils/SudokuBoardEnums.dart';
+
+import '../main.dart';
 
 class SudokuGridWidget extends StatefulWidget {
   final Map<String, dynamic> generatedSudoku;
+  final bool isMultiplayer;
 
-  SudokuGridWidget({required this.generatedSudoku});
+  SudokuGridWidget({required this.generatedSudoku, required this.isMultiplayer});
 
   @override
   _SudokuGridWidgetState createState() => _SudokuGridWidgetState();
@@ -14,6 +19,18 @@ class SudokuGridWidget extends StatefulWidget {
 
 class _SudokuGridWidgetState extends State<SudokuGridWidget>
     with WidgetsBindingObserver {
+  bool _isLoading = true;
+  AudioPlayer audioPlayer = AudioPlayer();
+  AudioCache? audioCache;
+  // void initAudioCache() async {
+  //   audioCache = AudioCache(fixedPlayer: audioPlayer);
+  //   await audioCache?.load('assets/audio/alert_sound.mp3');
+  // }
+
+  void playAlertSound() {
+    audioCache?.play('assets/audio/alert_sound.mp3');
+  }
+
   List<List<Color>> sudokuGridColors = List.generate(9, (_) => List.filled(9, Colors.transparent));
   List<List<int?>> sudokuGrid = List.generate(9, (_) => List.filled(9, null));
   List<List<int>> sudokuGridCorrect = List.generate(9, (_) => List.filled(9, 0));
@@ -24,7 +41,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   bool isCellTapped = false;
   bool isNonActiveIsActive= false;
 
-  String? difficultyLevel;
+  Difficulty? difficultyLevel;
   int numberOfMistakes = 0;
   int scoreTillNow = 0;
 
@@ -79,6 +96,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
 
     });
   }
+
   void resetNonActiveCell() {
     setState(() {
       isNonActiveIsActive= false;
@@ -93,6 +111,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   @override
   void initState() {
     super.initState();
+    // initAudioCache();
     startTimer();
     initializeSudoku();
     timer = Timer.periodic(Duration(seconds: 1), (_) {
@@ -101,30 +120,35 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
       });
     });
     WidgetsBinding.instance?.addObserver(this);
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      pauseTimer();
-      if (numberOfMistakes >= 3) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => buildMaxMistakesDialog(),
-        );
-      } else if (isPaused) {
-        // showDialog(
-        //   context: context,
-        //   barrierDismissible: false,
-        //   builder: (context) => showPauseDialog(context),
-        // );
-        showPauseDialog(context);
+    if(!widget.isMultiplayer){
+      if (state == AppLifecycleState.paused) {
+        pauseTimer();
+        if (numberOfMistakes >= 3) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => buildMaxMistakesDialog(),
+          );
+        } else if (isPaused) {
+          // showDialog(
+          //   context: context,
+          //   barrierDismissible: false,
+          //   builder: (context) => showPauseDialog(context),
+          // );
+          showPauseDialog(context);
+        }
       }
+      // else if (state == AppLifecycleState.resumed) {
+      //   resumeTimer();
+      // }
     }
-    // else if (state == AppLifecycleState.resumed) {
-    //   resumeTimer();
-    // }
   }
 
   @override
@@ -201,6 +225,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   void fillCellWithNumber(int number) {
     if (isCellTapped && activeCellRow != null && activeCellCol != null) {
       if (sudokuGridCorrect[activeCellRow!][activeCellCol!] != number) {
+        playAlertSound();
+        print('alert_sound');
         setState(() {
           numberOfMistakes++;
         });
@@ -232,7 +258,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                   Navigator.pop(context);
                   Navigator.pop(context);
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => PraticeOfflineSudokuScreen(difficultyLevel: difficultyLevel.toString(),))
+                      MaterialPageRoute(builder: (_) => PraticeOfflineSudokuScreen(difficultyLevel: difficultyLevel as Difficulty,))
                   );
                 },
                 child: Text('Restart'),
@@ -267,38 +293,69 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                 return false;
               },
               child: AlertDialog(
-                title: Text('Paused'),
+                title: Text('Paused',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
                 content: Container(
                   height: dialogHeight * 0.5,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Column(
                             children: [
-                              Text('Mistakes'),
-                              Text('$numberOfMistakes/3'),
+                              Text('Mistakes',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold
+                                ),
+                              ),
+                              Text('$numberOfMistakes/3',
+
+                              ),
                             ],
                           ),
                           SizedBox(width: 20),
                           Column(
                             children: [
-                              Text('Time'),
-                              Text('${_formatElapsedTime(elapsedTime)}'),
+                              Text('Time',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold
+                                ),
+                              ),
+                              Text('${_formatElapsedTime(elapsedTime)}',
+
+                              ),
                             ],
                           ),
                           SizedBox(width: 20),
                           Column(
                             children: [
-                              Text('Difficulty'),
-                              Text('$difficultyLevel'),
+                              Text('Difficulty',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold
+                                ),
+                              ),
+                              Text('${difficultyLevel?.name}',
+
+                              ),
                             ],
                           ),
                         ],
                       ),
                       // Image of 150x150
+                      SizedBox(height: 20,),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        height: MediaQuery.of(context).size.width * 0.7,
+                        child: Container(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      )
                     ],
                   ),
                 ),
@@ -315,6 +372,9 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                         child: Text('Exit'),
                       ),
                       ElevatedButton(
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)
+                        ),
                         onPressed: () {
                           // Resume game
                           Navigator.pop(context);
@@ -340,242 +400,273 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        pauseTimer();
+        widget.isMultiplayer
+            ? null
+            : pauseTimer();
         return true;
       },
-      child: Scaffold(
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: _isLoading
+          ? Scaffold(
+            body: Center(child: CircularProgressIndicator(),),
+          )
+          : Scaffold(
+            body: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(difficultyLevel!),
-                Text('Score: $scoreTillNow'),
-                Text('Mistakes: $numberOfMistakes/3'),
-                TextButton.icon(
-                  onPressed: isPaused ? resumeTimer : pauseTimer,
-                  label: Text(
-                    _formatElapsedTime(elapsedTime),
-                  ),
-                  icon: Icon(isPaused ? Icons.play_arrow : Icons.pause),
 
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text(difficultyLevel!.name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold
+                      ),
+                    ),
+                    Text('Score: $scoreTillNow',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                    Text('Mistakes: $numberOfMistakes/3',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                    widget.isMultiplayer
+                        ? TextButton.icon(
+                      onPressed: (){},
+                      label: Text(
+                        _formatElapsedTime(elapsedTime),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                      icon: Icon(Icons.timer, weight: 700,),
+                    )
+                        : TextButton.icon(
+                      onPressed: isPaused ? resumeTimer : pauseTimer,
+                      label: Text(
+                        _formatElapsedTime(elapsedTime),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+                      icon: Icon(isPaused ? Icons.play_arrow : Icons.pause, weight: 700,),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            //SizedBox(height: 8),
+                //SizedBox(height: 8),
 
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: 81,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 9,
-                ),
-                itemBuilder: (context, index) {
-                  final row = index ~/ 9;
-                  final col = index % 9;
-                  final cellValue = sudokuGrid[row][col];
-                  final editableCell = isEditableCell(row, col);
-                  final isActiveCell = activeCellRow == row && activeCellCol == col;
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: 81,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 9,
+                    ),
+                    itemBuilder: (context, index) {
+                      final row = index ~/ 9;
+                      final col = index % 9;
+                      final cellValue = sudokuGrid[row][col];
+                      final editableCell = isEditableCell(row, col);
+                      final isActiveCell = activeCellRow == row && activeCellCol == col;
 
 
-                  final isBoldCellColumn = col==0 || col == 3 || col == 6 ;
-                  final isBoldCellRow = row == 0  || row == 3 || row == 6;
-                  final rowNumberEight = row == 8;
-                  final columnNumberEight = col == 8;
-                  final borderColor = isBoldCellColumn || isBoldCellRow || rowNumberEight || columnNumberEight
-                      ? Colors.black
-                      : Colors.blueGrey;
+                      final isBoldCellColumn = col==0 || col == 3 || col == 6 ;
+                      final isBoldCellRow = row == 0  || row == 3 || row == 6;
+                      final rowNumberEight = row == 8;
+                      final columnNumberEight = col == 8;
+                      final borderColor = isBoldCellColumn || isBoldCellRow || rowNumberEight || columnNumberEight
+                          ? Colors.black
+                          : Colors.blueGrey;
 
-                  final tappedColor = Colors.blueGrey.shade100; // Change this to the desired color
+                      final tappedColor = Colors.blueGrey.shade100; // Change this to the desired color
 
-                  Color cellColor = isActiveCell ? Colors.blueGrey : Colors.grey.withOpacity(0.1);
-                  cellColor = isNonActiveIsActive ? sudokuGridColors[row][col]: cellColor;
-                  if (!editableCell && isActiveCell) {
-                    cellColor = tappedColor;
-                  } else if (!editableCell) {
-                    cellColor = cellColor; // Change this to the desired background color
-                  }
-
-
-
-                  return GestureDetector(
-                    onTap: () {
-                      if (editableCell) {
-                        if (isActiveCell) {
-                          resetActiveCell();
-                        } else {
-                          setState(() {
-                            setActiveCell(row, col);
-                          });
-                        }
+                      Color cellColor = isActiveCell ? Colors.blueGrey : Colors.grey.withOpacity(0.1);
+                      cellColor = isNonActiveIsActive ? sudokuGridColors[row][col]: cellColor;
+                      if (!editableCell && isActiveCell) {
+                        cellColor = tappedColor;
+                      } else if (!editableCell) {
+                        cellColor = cellColor; // Change this to the desired background color
                       }
-                      else {
-                          resetNonActiveCell();
-                          setNonActiveCell(row, col, cellValue!);
-                      }
-                    },
-                    child: Stack(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border(
-                              right: BorderSide(color: columnNumberEight ? borderColor: Colors.grey.withOpacity(0.2)),
-                              left: BorderSide(color: isBoldCellColumn ? borderColor : Colors.grey.withOpacity(0.0)),
-                              bottom: BorderSide(color: rowNumberEight ? borderColor : Colors.grey.withOpacity(0.2)),
-                              top: BorderSide(color: isBoldCellRow ? borderColor : Colors.grey.withOpacity(0.0)),
 
+
+
+                      return GestureDetector(
+                        onTap: () {
+                          if (editableCell) {
+                            if (isActiveCell) {
+                              resetActiveCell();
+                            } else {
+                              setState(() {
+                                setActiveCell(row, col);
+                              });
+                            }
+                          }
+                          else {
+                              resetNonActiveCell();
+                              setNonActiveCell(row, col, cellValue!);
+                          }
+                        },
+                        child: Stack(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  right: BorderSide(color: columnNumberEight ? borderColor: Colors.grey.withOpacity(0.2)),
+                                  left: BorderSide(color: isBoldCellColumn ? borderColor : Colors.grey.withOpacity(0.0)),
+                                  bottom: BorderSide(color: rowNumberEight ? borderColor : Colors.grey.withOpacity(0.2)),
+                                  top: BorderSide(color: isBoldCellRow ? borderColor : Colors.grey.withOpacity(0.0)),
+
+                                ),
+                                color: cellColor,
+                                //fontWeight: isBoldCell ? FontWeight.bold : FontWeight.normal,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  cellValue != null ? cellValue.toString() : '',
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ),
                             ),
-                            color: cellColor,
-                            //fontWeight: isBoldCell ? FontWeight.bold : FontWeight.normal,
+                            isActiveCell && editableCell
+                                ? Positioned.fill(
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () {
+                                    // Handle cell interaction
+                                  },
+                                ),
+                              ),
+                            )
+                                : SizedBox(),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(height: 15),
+
+                // RESET, ERASE, NOTES, HINT
+                // Padding(
+                //   padding: EdgeInsets.symmetric(horizontal: 8.0),
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //     children: [
+                //       TextButton(
+                //         onPressed: () {
+                //           // Handle reset button tap here
+                //         },
+                //         style: TextButton.styleFrom(
+                //             padding: EdgeInsets.all(8), //// Remove default padding
+                //         ),
+                //         child: Column(
+                //           mainAxisSize: MainAxisSize.min,
+                //           children: [
+                //             Icon(Icons.restore),
+                //             SizedBox(height: 4),
+                //             Text('Reset'),
+                //           ],
+                //         ),
+                //       ),
+                //       TextButton(
+                //         onPressed: () {
+                //           // Handle erase button tap here
+                //         },
+                //         style: TextButton.styleFrom(
+                //             padding: EdgeInsets.all(8), //// Remove default padding
+                //         ),
+                //         child: Column(
+                //           mainAxisSize: MainAxisSize.min,
+                //           children: [
+                //             Icon(Icons.backspace),
+                //             SizedBox(height: 4),
+                //             Text('Erase'),
+                //           ],
+                //         ),
+                //       ),
+                //       TextButton(
+                //         onPressed: () {
+                //           // Handle notes button tap here
+                //         },
+                //         style: TextButton.styleFrom(
+                //           padding: EdgeInsets.all(8), //// Remove default padding
+                //         ),
+                //         child: Column(
+                //           mainAxisSize: MainAxisSize.min,
+                //           children: [
+                //             Icon(Icons.note),
+                //             SizedBox(height: 4),
+                //             Text('Notes'),
+                //           ],
+                //         ),
+                //       ),
+                //       TextButton(
+                //         onPressed: () {
+                //           // Handle hint button tap here
+                //         },
+                //         style: TextButton.styleFrom(
+                //           padding: EdgeInsets.all(8), // Remove default padding
+                //         ),
+                //         child: Column(
+                //           mainAxisSize: MainAxisSize.min,
+                //           children: [
+                //             Icon(Icons.lightbulb),
+                //             SizedBox(height: 4),
+                //             Text('Hint'),
+                //           ],
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
+                SizedBox(height: 30),
+
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(9, (index) {
+                      int number = index + 1;
+                      return GestureDetector(
+                        onTap: () {
+                          fillCellWithNumber(number);
+                        },
+                        child: Container(
+                          width: 35,
+                          height: 35,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            borderRadius: BorderRadius.circular(8.0),
                           ),
                           child: Center(
                             child: Text(
-                              cellValue != null ? cellValue.toString() : '',
-                              style: TextStyle(fontSize: 20),
+                              number.toString(),
+                              style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
-                        isActiveCell && editableCell
-                            ? Positioned.fill(
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () {
-                                // Handle cell interaction
-                              },
-                            ),
-                          ),
-                        )
-                            : SizedBox(),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-            SizedBox(height: 15),
+                      );
+                    }),
+                  ),
+                ),
 
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      // Handle reset button tap here
-                    },
-                    style: TextButton.styleFrom(
-                        padding: EdgeInsets.all(8), //// Remove default padding
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.restore),
-                        SizedBox(height: 4),
-                        Text('Reset'),
-                      ],
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // Handle erase button tap here
-                    },
-                    style: TextButton.styleFrom(
-                        padding: EdgeInsets.all(8), //// Remove default padding
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.backspace),
-                        SizedBox(height: 4),
-                        Text('Erase'),
-                      ],
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // Handle notes button tap here
-                    },
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.all(8), //// Remove default padding
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.note),
-                        SizedBox(height: 4),
-                        Text('Notes'),
-                      ],
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // Handle hint button tap here
-                    },
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.all(8), // Remove default padding
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.lightbulb),
-                        SizedBox(height: 4),
-                        Text('Hint'),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+              ],
             ),
-            SizedBox(height: 30),
-
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(9, (index) {
-                  int number = index + 1;
-                  return GestureDetector(
-                    onTap: () {
-                      fillCellWithNumber(number);
-                    },
-                    child: Container(
-                      width: 35,
-                      height: 35,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Center(
-                        child: Text(
-                          number.toString(),
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
+            bottomNavigationBar: SizedBox(
+              height: MediaQuery.of(context).size.height*0.1,
+              child: Container(
+                color: Theme.of(context).primaryColor,
+                child: Center(
+                    child: Text('space for banner adds')
+                ),
               ),
-            ),
-
-            SizedBox(height: MediaQuery.of(context).size.height*0.08,),
-          ],
-        ),
-        bottomNavigationBar: SizedBox(
-          height: MediaQuery.of(context).size.height*0.1,
-          child: Container(
-            color: Colors.teal,
-            child: Center(
-                child: Text('space for banner adds')
             ),
           ),
-        ),
-      ),
     );
   }
 }

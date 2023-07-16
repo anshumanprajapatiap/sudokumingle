@@ -24,7 +24,21 @@ class _AuthScreenState extends State<AuthScreen> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Center(
-          child: GoogleSignInWidget(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width*0.8,
+                height: MediaQuery.of(context).size.width*0.8,
+                color: Theme.of(context).secondaryHeaderColor,
+                child: Center(child: Text('Space for Ads')),
+              ),
+              SizedBox(
+                height: 30,
+              ),
+              GoogleSignInWidget(),
+            ],
+          ),
           ),
         ),
       );
