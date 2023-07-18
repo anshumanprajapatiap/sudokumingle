@@ -1,4 +1,5 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class GlobalMethodUtil{
@@ -14,12 +15,12 @@ class GlobalMethodUtil{
         builder: (context) {
           return AlertDialog(
             title: Row(children: [
-              Image.asset(
-                'assets/images/warning-sign.png',
-                height: 20,
-                width: 20,
-                fit: BoxFit.fill,
-              ),
+              // Image.asset(
+              //   'assets/images/warning-sign.png',
+              //   height: 20,
+              //   width: 20,
+              //   fit: BoxFit.fill,
+              // ),
               const SizedBox(
                 width: 8,
               ),
@@ -54,4 +55,20 @@ class GlobalMethodUtil{
           );
         });
   }
+}
+
+class FirebaseGlobalMethodUtil{
+
+  static void deleteDocument(String collectionName, String documentId) {
+    FirebaseFirestore.instance
+        .collection(collectionName)
+        .doc(documentId)
+        .delete()
+        .then((_) {
+      print("Document deleted successfully!");
+    }).catchError((error) {
+      print("Error deleting document: $error");
+    });
+  }
+
 }

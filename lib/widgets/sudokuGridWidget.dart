@@ -1,17 +1,28 @@
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:sudokumingle/screens/homeScreen.dart';
 import 'package:sudokumingle/screens/praticeOfflineScreen.dart';
 import 'package:sudokumingle/utils/SudokuBoardEnums.dart';
+import 'package:sudokumingle/utils/constants.dart';
 
 import '../main.dart';
+import '../utils/globalMethodUtil.dart';
 
 class SudokuGridWidget extends StatefulWidget {
   final Map<String, dynamic> generatedSudoku;
   final bool isMultiplayer;
+  final String activeGameId;
+  final String activePuzzleId;
 
-  SudokuGridWidget({required this.generatedSudoku, required this.isMultiplayer});
+  SudokuGridWidget({
+    required this.generatedSudoku,
+    required this.isMultiplayer,
+    required this.activeGameId,
+    required this.activePuzzleId
+  });
 
   @override
   _SudokuGridWidgetState createState() => _SudokuGridWidgetState();
@@ -19,6 +30,7 @@ class SudokuGridWidget extends StatefulWidget {
 
 class _SudokuGridWidgetState extends State<SudokuGridWidget>
     with WidgetsBindingObserver {
+  Timer? searchTimer;
   bool _isLoading = true;
   AudioPlayer audioPlayer = AudioPlayer();
   AudioCache? audioCache;
@@ -245,33 +257,47 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   }
 
   AlertDialog buildMaxMistakesDialog() {
+    if(widget.isMultiplayer){
+
+    }
     return AlertDialog(
       title: Text('Maximum Mistakes Reached'),
       content: Text('You have made 3 mistakes. Do you want to restart the game or go back?'),
       actions: [
         Center(
           child: Row(
-            children: [
-              TextButton(
-                onPressed: () {
-                  // Restart game
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => PraticeOfflineSudokuScreen(difficultyLevel: difficultyLevel as Difficulty,))
-                  );
-                },
-                child: Text('Restart'),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Go back
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
-                child: Text('Go Back'),
-              ),
-            ],
+            children: widget.isMultiplayer
+                ? [
+                    TextButton(
+                      onPressed: () {
+                      // Go back
+                        //deleteFromActiveGamePool();
+                        Navigator.pop(context);
+                      },
+                      child: Text('Go Back'),
+                    ),
+                  ]
+                : [
+                    TextButton(
+                      onPressed: () {
+                        // Restart game
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (_) => PraticeOfflineSudokuScreen(difficultyLevel: difficultyLevel as Difficulty,))
+                        );
+                      },
+                      child: Text('Restart'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Go back
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                      child: Text('Go Back'),
+                    ),
+                  ],
           ),
         )
       ],
@@ -394,15 +420,36 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     );
   }
 
-
+  // fetchUserFromActiveGamePoolContinuously(String gameId) async{
+  //   print('fetching Game is Active $gameId for puzzle ${widget.activePuzzleId}');
+  //   CollectionReference activeUserPoolCollection = FirebaseFirestore.instance.collection('ActiveGamePool');
+  //   DocumentSnapshot snapshot = await activeUserPoolCollection.doc(gameId).get();
+  //   if(!snapshot.exists){
+  //     Navigator.pop(context);
+  //   }
+  // }
+  //
+  // void deleteFromActiveGamePool() async{
+  //   print('Game Over');
+  //   FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_GAME_POOL, widget.activeGameId);
+  //   FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_PUZZLE_POOL, widget.activePuzzleId);
+  //   print('Game deleted');
+  // }
 
   @override
   Widget build(BuildContext context) {
+    if(widget.isMultiplayer){
+      //fetchUserFromActiveGamePoolContinuously(widget.activeGameId);
+    }
+
     return WillPopScope(
       onWillPop: () async {
-        widget.isMultiplayer
-            ? null
-            : pauseTimer();
+        if(widget.isMultiplayer){
+          //deleteFromActiveGamePool();
+        }
+        else{
+          pauseTimer();
+        }
         return true;
       },
       child: _isLoading

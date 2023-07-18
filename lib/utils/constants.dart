@@ -12,4 +12,8 @@ class Constants {
     'assets/images/avatar/avator9.png',
     'assets/images/avatar/avator10.png',
   ];
+
+  static String ACTIVE_USER_POOL = 'ActiveUserPool';
+  static String ACTIVE_PUZZLE_POOL = 'ActivePuzzlePool';
+  static String ACTIVE_GAME_POOL = 'ActiveGamePool';
 }

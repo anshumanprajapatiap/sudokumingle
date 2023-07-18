@@ -8,6 +8,7 @@ import 'package:sudokumingle/widgets/sudokuGridWidget.dart';
 import 'package:uuid/uuid.dart';
 
 import '../utils/SudokuBoardEnums.dart';
+import '../utils/constants.dart';
 import '../utils/sudokuGeneratorNewAlgorithm.dart';
 import '../widgets/userSearchingWidget.dart';
 
@@ -31,6 +32,8 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
   List<List<int>>? correctSudokuToPass;
   List<List<int?>>? toBeSolvedSudokuToPass;
   String _counter = '3';
+  bool? _isFirst  ;
+  Timestamp screenCreatedAt = Timestamp.now();
 
   // Map<String, dynamic> puzzleToPass = {
   //   'correctSudoku': [[0]],
@@ -39,6 +42,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
   // };
   String? gameId;
   String? puzzleId;
+  bool _isGameOver = false;
 
 
   void putUserIntoActiveUser() async{
@@ -71,6 +75,8 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
         'userId': userId,
         'username': username,
         'difficultyLevel': difficultyLevel,
+        'createdAt': screenCreatedAt,
+        'inGame': false
       });
 
       print('User data added to ActiveUserPool successfully!');
@@ -84,19 +90,13 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
     if (currentUser == null) {
       return;
     }
-    String _currentUserId = currentUser!.uid;
-    removeUserFromActiveUserPool(_currentUserId);
+    String currentUserId = currentUser!.uid;
+    removeUserFromActiveUserPool(currentUserId);
 
   }
 
   void removeUserFromActiveUserPool(String userId) async {
-    CollectionReference activeUserPoolCollection = FirebaseFirestore.instance.collection('ActiveUserPool');
-    try {
-      await activeUserPoolCollection.doc(userId).delete();
-      print('User removed from ActiveUserPool successfully!');
-    } catch (error) {
-      print('Error removing user from ActiveUserPool: $error');
-    }
+    FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_USER_POOL, userId);
   }
 
   void fetchUserFromActivePool() async {
@@ -139,7 +139,6 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
       return;
     }
 
-
     CollectionReference activeUserPoolCollection = FirebaseFirestore.instance.collection('ActiveUserPool');
     searchTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
       QuerySnapshot snapshot = await activeUserPoolCollection.get();
@@ -151,11 +150,25 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
           String userId = documentData['userId'] as String? ?? '';
           String username = documentData['username'] as String? ?? '';
           String difficultyLevelOfUser = documentData['difficultyLevel'] as String? ?? '';
-          if (difficultyLevelOfUser == difficulty) {
+          Timestamp createdAt = documentData['createdAt'];
+          bool? isGame = documentData['inGame'];
+          print('createdAtHere $createdAt');
+          if (difficultyLevelOfUser == difficulty && isGame!=null && isGame == false) {
             // The difficulty level matches, perform your desired action
-            print('User found in ActiveUserPool: $userId - $username - $difficultyLevelOfUser');
+            print('User found in ActiveUserPool: $userId - $username - $difficultyLevelOfUser - $createdAt');
             // Stop searching by canceling the timer
             searchTimer?.cancel();
+            int comparisonResult = screenCreatedAt.compareTo(createdAt);
+            print('comparisonResult $comparisonResult');
+            if (comparisonResult<=0) {
+              setState(() {
+                _isFirst = true;
+              });
+            } else {
+              setState(() {
+                _isFirst = false;
+              });
+            }
             onBoardToGame(userId);
             break;
           }
@@ -178,7 +191,6 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
     return snapshot.exists;
   }
 
-  // Flatten a 9x9 array into a single-dimensional array
   List<int> flattenArray(List<List<int?>> nestedArray) {
     List<int> flattenedArray = [];
     for (int i = 0; i < nestedArray.length; i++) {
@@ -190,21 +202,6 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
     return flattenedArray;
   }
 
-  // Convert a flattened array into a 9x9 nested array
-  // void convertToNestedArray(List<dynamic> flattenedArray) {
-  //   List<List<dynamic>> nestedArray = [];
-  //   for (int i = 0; i < 9; i++) {
-  //     List<int> row = [];
-  //     for(int j = 0; j < 9; j++){
-  //       row.add(flattenedArray[i+j]);
-  //     }
-  //   }
-  //   setState(() {
-  //
-  //   });
-  //   print(nestedArray);
-  //   //return nestedArray as List<List<int>>;
-  // }
   List<List<int>> convertToNestedArray(List<dynamic> flattenedArray) {
     List<List<int>> nestedArray = [];
 
@@ -251,8 +248,12 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
   String generatePuzzle(){
     final sudokuPuzzler = SudokuGeneratorAgorithmV2();
     Map<String, dynamic> puzzleData= sudokuPuzzler.generatePuzzle(widget.difficultyLevel);
+    // puzzleData.addAll({
+    //   'createdBy': currentUser!.uid,
+    //   'createdAt':screenCreatedAt
+    // });
     String pId = Uuid().v4();
-    print('puzzleId ${puzzleId}');
+    print('puzzleon which puzzle is created Id ${pId}');
     createActivePuzzleOnActivePuzzlePool(pId, puzzleData);
     return pId;
   }
@@ -282,7 +283,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
   }
 
   Future<void> fetchPuzzleForGame(String puzzleId) async {
-    print('feting puzzleData ${puzzleId}');
+    print('fetingpuzzleDataForGameFucntion ${puzzleId}');
     CollectionReference activePuzzlePoolCollection = FirebaseFirestore.instance.collection('ActivePuzzlePool');
     DocumentSnapshot snapshot = await activePuzzlePoolCollection.doc(puzzleId).get();
 
@@ -308,81 +309,178 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
     }
   }
 
+  void createGameOnActiveGamePool(String gameIdGenerated, String player2UserId) async {
+    print('GENERATING PUZZLE');
+    String puzzleIdTemp = generatePuzzle();
+    print('creating game');
+    try {
+      // Reference to the ActiveUserPool collection
+
+      CollectionReference activeUserPoolCollection = FirebaseFirestore.instance.collection(Constants.ACTIVE_GAME_POOL);
+      // Create a document with the current user ID as the document ID
+      DocumentReference userDocument = activeUserPoolCollection.doc(gameIdGenerated);
+
+      // Set the data for the user document
+      await userDocument.set({
+        'gameId': gameIdGenerated,
+        'playerId1': currentUser!.uid,
+        'playerId2': player2UserId,
+        'puzzleId': puzzleIdTemp,
+        'winnerId': '',
+        'createdAt': screenCreatedAt,
+        'endedAt': screenCreatedAt,
+        'createdBy': currentUser!.uid
+      });
+
+      print('ActiveGamePool Created!');
+      setState(() {
+        gameId = gameIdGenerated;
+        puzzleId = puzzleIdTemp;
+      });
+      fetchPuzzleForGame(puzzleId!);
+
+    } catch (error) {
+      print('ActiveGamePool: $error');
+    }
+  }
+
+  // void generateGame(String player2UserId) async {
+  //   print('generating game');
+  //   CollectionReference activeGamePoolCollection = FirebaseFirestore.instance.collection('ActiveGamePool');
+  //   String gameIDTemp1 = currentUser!.uid+'-'+player2UserId;
+  //   String gameIDTemp2 = player2UserId+'-'+currentUser!.uid;
+  //   print('gameIDTemp1 $gameIDTemp1');
+  //   print('gameIDTemp2 $gameIDTemp2');
+  //   DocumentSnapshot docRef1 = await activeGamePoolCollection.doc(gameIDTemp1).get();
+  //   if(docRef1.exists){
+  //     print('doc1');
+  //     Map<String, dynamic>? documentData = docRef1.data() as Map<String, dynamic>?;
+  //       String puzzleIdTemp = documentData!['puzzleId'] as String? ?? '';
+  //       print('puzzleIdTemp $puzzleIdTemp');
+  //       setState(() {
+  //         gameId = gameIDTemp1;
+  //         puzzleId = puzzleIdTemp;
+  //       });
+  //       print('puzzleId $puzzleId');
+  //   }
+  //
+  //   DocumentSnapshot docRef2 = await activeGamePoolCollection.doc(gameIDTemp2).get();
+  //   if(docRef2.exists){
+  //     print('doc2');
+  //       Map<String, dynamic>? documentData = docRef2.data() as Map<String, dynamic>?;
+  //       String puzzleIdTemp = documentData!['puzzleId'] as String? ?? '';
+  //       print('puzzleIdTemp $puzzleIdTemp');
+  //       setState(() {
+  //         gameId = gameIDTemp1;
+  //         puzzleId = puzzleIdTemp;
+  //       });
+  //       print('puzzleId $puzzleId');
+  //   }
+  //
+  //   if(!docRef1.exists && !docRef1.exists){
+  //     //createGame
+  //     print('GENERATING PUZZLE');
+  //     String puzzleIdTemp = generatePuzzle();
+  //     print('creating game');
+  //     try {
+  //       // Reference to the ActiveUserPool collection
+  //
+  //       CollectionReference activeUserPoolCollection = FirebaseFirestore.instance.collection(Constants.ACTIVE_GAME_POOL);
+  //       // Create a document with the current user ID as the document ID
+  //       DocumentReference userDocument = activeUserPoolCollection.doc(gameIDTemp1);
+  //
+  //       // Set the data for the user document
+  //       await userDocument.set({
+  //         'gameId': gameIDTemp1,
+  //         'playerId1': currentUser!.uid,
+  //         'playerId2': player2UserId,
+  //         'puzzleId': puzzleIdTemp,
+  //         'winnerId': '',
+  //         'createdAt': DateTime.now(),
+  //         'endedAt': DateTime.now(),
+  //       });
+  //
+  //       print('ActiveGamePool Created!');
+  //       setState(() {
+  //         gameId = gameIDTemp1;
+  //         puzzleId = puzzleIdTemp;
+  //       });
+  //
+  //     } catch (error) {
+  //       print('ActiveGamePool: $error');
+  //     }
+  //   }
+  //   print('got gamedata');
+  //   fetchPuzzleForGame(puzzleId!);
+  //
+  // }
+
   void generateGame(String player2UserId) async {
     print('generating game');
     CollectionReference activeGamePoolCollection = FirebaseFirestore.instance.collection('ActiveGamePool');
-    String gameIDTemp1 = currentUser!.uid+'-'+player2UserId;
-    String gameIDTemp2 = player2UserId+'-'+currentUser!.uid;
-    print('gameIDTemp1 $gameIDTemp1');
-    print('gameIDTemp2 $gameIDTemp2');
-    DocumentSnapshot docRef1 = await activeGamePoolCollection.doc(gameIDTemp1).get();
-    DocumentSnapshot docRef2 = await activeGamePoolCollection.doc(gameIDTemp2).get();
-    print('docRef1 and docRef2');
-    if(docRef1.exists){
-      print('doc1');
-      Map<String, dynamic>? documentData = docRef1.data() as Map<String, dynamic>?;
-        String puzzleIdTemp = documentData!['puzzleId'] as String? ?? '';
-        print('puzzleIdTemp $puzzleIdTemp');
-        setState(() {
-          gameId = gameIDTemp1;
-          puzzleId = puzzleIdTemp;
-        });
-        print('puzzleId $puzzleId');
-    }
-    else if(docRef2.exists){
-      print('doc2');
-        Map<String, dynamic>? documentData = docRef2.data() as Map<String, dynamic>?;
-        String puzzleIdTemp = documentData!['puzzleId'] as String? ?? '';
-        print('puzzleIdTemp $puzzleIdTemp');
-        setState(() {
-          gameId = gameIDTemp1;
-          puzzleId = puzzleIdTemp;
-        });
-        print('puzzleId $puzzleId');
+    String gameIDByThisUser = currentUser!.uid+'-'+player2UserId;
+    String gameIDByOtherUser = player2UserId+'-'+currentUser!.uid;
+
+    if(_isFirst!){
+      createGameOnActiveGamePool(gameIDByThisUser, player2UserId);
+      // DocumentSnapshot docRef = await activeGamePoolCollection.doc(gameIDByThisUser).get();
     }
     else{
-      //createGame
-      print('GENERATING PUZZLE');
-      String puzzleIdTemp = generatePuzzle();
-      print('creating game');
-      try {
-        // Reference to the ActiveUserPool collection
+      while(true){
+        print(gameIDByOtherUser);
+        DocumentSnapshot docRef = await activeGamePoolCollection.doc(gameIDByOtherUser).get();
+        if(docRef.exists){
 
-        CollectionReference activeUserPoolCollection = FirebaseFirestore.instance.collection('ActiveGamePool');
-        // Create a document with the current user ID as the document ID
-        DocumentReference userDocument = activeUserPoolCollection.doc(gameIDTemp1);
-
-        // Set the data for the user document
-        await userDocument.set({
-          'gameId': gameIDTemp1,
-          'playerId1': currentUser!.uid,
-          'playerId2': player2UserId,
-          'puzzleId': puzzleIdTemp,
-          'winnerId': '',
-          'createdAt': DateTime.now(),
-          'endedAt': DateTime.now(),
-        });
-
-        print('ActiveGamePool Created!');
-        setState(() {
-          gameId = gameIDTemp1;
-          puzzleId = puzzleIdTemp;
-        });
-
-      } catch (error) {
-        print('ActiveGamePool: $error');
+            Map<String, dynamic>? documentData = docRef.data() as Map<String, dynamic>?;
+            String puzzleIdTemp = documentData!['puzzleId'] as String? ?? '';
+            print('puzzleIdTemp $puzzleIdTemp');
+            setState(() {
+              gameId = gameIDByOtherUser;
+              puzzleId = puzzleIdTemp;
+            });
+            print('puzzleId $puzzleId');
+            break;
+        }
       }
     }
-    print('got gamedata');
+    print('now will fetch puzzle data for $puzzleId');
+
     fetchPuzzleForGame(puzzleId!);
 
+  }
+  void setCurrentUserFromActiveUserPoolTrue(){
+    if (currentUser == null) {
+      return;
+    }
+    String currentUserId = currentUser!.uid;
+    updateInGameStatus(currentUserId);
+  }
+
+  Future<void> updateInGameStatus(String userId) async {
+    try {
+      // Reference to the ActiveUserPool collection
+      CollectionReference activeUserPoolCollection =
+      FirebaseFirestore.instance.collection('ActiveUserPool');
+
+      // Get the document reference for the user with the given userId
+      DocumentReference userDocument = activeUserPoolCollection.doc(userId);
+
+      // Update the 'inGame' field to true
+      await userDocument.update({'inGame': true});
+
+      print('User inGame status updated successfully!');
+    } catch (error) {
+      print('Error updating user inGame status: $error');
+    }
   }
 
   Future<void> onBoardToGame(String player2UserId) async {
     bool isExists = await isDocumentExists(player2UserId);
-    bool isExistsCurrent = await isDocumentExists(currentUser!.uid);
+    //bool isExistsCurrent = await isDocumentExists(currentUser!.uid);
 
-    if (isExists && isExistsCurrent) {
+    await Future.delayed(Duration(seconds: 2), () {print('deplayed1');});
+
+    if (isExists) {
       print('game will start soon');
       setState(() {
         _isSeaching = false;
@@ -390,10 +488,11 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
       print('_isSeaching1 $_isSeaching');
       print('_isInActiveUserTable1 $_isInActiveUserTable');
       print('_isGameStarted1 $_isGameStarted');
-      //await Future.delayed(Duration(seconds: 2), () {print('deplayed1');});
+      await Future.delayed(Duration(seconds: 2), () {print('deplayed1');});
 
-      removeCurrentUserFromActiveUserPool();
+      //removeCurrentUserFromActiveUserPool();
       // removeUserFromActiveUserPool(player2UserId);
+      setCurrentUserFromActiveUserPoolTrue();
 
       setState(() {
         _isInActiveUserTable = false;
@@ -404,7 +503,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
       //await Future.delayed(Duration(seconds: 2), () {print('deplayed2');});
 
       generateGame(player2UserId);
-      print('game id Created');
+      print('game Created with $player2UserId');
 
       setState(() {
         _isGameStarted = true;
@@ -431,7 +530,25 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
     }
 
   }
-  
+
+  fetchUserFromActiveGamePoolContinuously() async{
+    // print('fetching Game is Active $gameId for puzzle ${widget.activePuzzleId}');
+    CollectionReference activeUserPoolCollection = FirebaseFirestore.instance.collection('ActiveGamePool');
+    DocumentSnapshot snapshot = await activeUserPoolCollection.doc(gameId).get();
+    if(!snapshot.exists){
+      // Navigator.pop(context);
+      setState(() {
+        _isGameOver = true;
+      });
+    }
+  }
+
+  void deleteFromActiveGamePool() async{
+    print('Game Over');
+    FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_GAME_POOL, gameId!);
+    FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_PUZZLE_POOL,  puzzleId!);
+    print('Game deleted');
+  }
 
   @override
   void initState() {
@@ -466,6 +583,9 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
 
   @override
   Widget build(BuildContext context) {
+    if(gameId!=null){
+      fetchUserFromActiveGamePoolContinuously();
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
@@ -481,7 +601,10 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                 ? const Text('Playing')
                 : const Text( 'Puzzle Loading')
       ),
-      body:  _isInActiveUserTable
+      body:  _isGameOver
+          ? Center(child: Text('Textgame is over now'))
+
+          : _isInActiveUserTable
           ? Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -510,7 +633,10 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                       'correctSudoku': correctSudokuToPass,
                         'toBeSolvedSudoku': toBeSolvedSudokuToPass,
                         'difficulty': widget.difficultyLevel
-                    }, isMultiplayer: true,
+                    },
+                    isMultiplayer: true,
+                    activeGameId: gameId ?? '',
+                    activePuzzleId: puzzleId ?? '',
                   )
                // : UserSearchingWidget(milliSecondsDelayTime: 100000000, searching: false, userAvatarIndex: 9,)
             : Center(child:

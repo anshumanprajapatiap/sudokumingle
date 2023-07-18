@@ -24,7 +24,7 @@ class SplashScreen extends StatelessWidget {
           //crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Image.asset('assets/images/sudokuMingleLogo.png'),
+            Image.asset('assets/images/logo/sudoku-mingle-3.png'),
             SizedBox(height: 30,),
             Text(
               'Sudoku Mingle',
