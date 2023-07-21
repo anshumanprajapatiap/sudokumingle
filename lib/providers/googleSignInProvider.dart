@@ -5,6 +5,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
+import '../utils/constants.dart';
+
 class GoogleSignInProvider extends ChangeNotifier {
   final googleSignIn = GoogleSignIn();
 
@@ -45,30 +47,27 @@ class GoogleSignInProvider extends ChangeNotifier {
       print('currentuser->${_currentUser!.uid}');
       print(_currentUser);
 
-      // final userDoc = FirebaseFirestore.instance
-      //     .collection("customUsersProfile")
-      //     .doc(_currentUser!.uid);
+      final userDoc = FirebaseFirestore.instance
+          .collection(Constants.CUSTOM_USER_PROFILE)
+          .doc(_currentUser!.uid);
 
-      // final userSnapshot = await userDoc.get();
-      // if (userSnapshot.exists) {
-      //   // Document already exists
-      //   // You can handle the case when the document already exists
-      //   print('allready exist');
-      // } else {
-      //   // Document doesn't exist, create it
-      //   final newUserData = {
-      //     'name': _currentUser!.displayName,
-      //     'email': _currentUser!.email,
-      //     'countryCodeEnum': CountryCodeEnum.IND.value,
-      //     'phoneNumber': '0000000000',
-      //     'phoneNumberVerified': false,
-      //     'timezone': TimeZoneEnum.IST.displayName,
-      //     'defaultCurrencyEnum': CurrencyEnum.INR.code,
-      //     'language': LanguageEnum.english.displayName
-      //   };
+      final userSnapshot = await userDoc.get();
+      if (userSnapshot.exists) {
+        // Document already exists
+        // You can handle the case when the document already exists
+        print('allready exist');
+      } else {
+        // Document doesn't exist, create it
+        final newUserData = {
+          'name': _currentUser!.displayName,
+          'email': _currentUser!.email,
+          'mingleCoins': 0,
+          'rank': 0,
+          'isPro': false,
+        };
 
-        //await userDoc.set(newUserData);
-      // }
+        await userDoc.set(newUserData);
+      }
 
       print('newuser');
     } on FirebaseAuthException catch(e){

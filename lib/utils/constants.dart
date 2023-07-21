@@ -13,7 +13,10 @@ class Constants {
     'assets/images/avatar/avator10.png',
   ];
 
+  static String CUSTOM_USER_PROFILE = 'customUserProfile';
   static String ACTIVE_USER_POOL = 'ActiveUserPool';
   static String ACTIVE_PUZZLE_POOL = 'ActivePuzzlePool';
   static String ACTIVE_GAME_POOL = 'ActiveGamePool';
+  static String USER_GAME_HISTORY = 'userGameHistory';
+
 }
