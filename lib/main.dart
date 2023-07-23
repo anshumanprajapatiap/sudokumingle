@@ -1,9 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sudokumingle/providers/darkThemeProvider.dart';
 import 'package:sudokumingle/providers/googleSignInProvider.dart';
+import 'package:sudokumingle/screens/bottomNavigationBar.dart';
 import 'package:sudokumingle/screens/splashScreen.dart';
 
 import 'firebase_options.dart';
@@ -14,14 +16,17 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider(create: (_) => ThemeSwitchProvider()),
-      ChangeNotifierProvider(create: (_) => GoogleSignInProvider()),
-    ],
-    child: MyApp(),
-  )
-  );
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeSwitchProvider()),
+        ChangeNotifierProvider(create: (_) => GoogleSignInProvider()),
+      ],
+      child: MyApp(),
+    )
+    );
+  });
 }
 
 class MyApp extends StatefulWidget {
@@ -38,6 +43,10 @@ class _MyAppState extends State<MyApp> {
       builder: (context, themeProvider, _) {
         print(themeProvider.getTheme());
         return MaterialApp(
+          routes: {
+            TabsScreen.routeName: (ctx) => const TabsScreen(),
+            // Add other routes here if needed
+          },
           title: 'My App',
           theme: themeProvider.getTheme(),
           //home: TabsScreen(),

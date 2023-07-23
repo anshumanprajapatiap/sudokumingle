@@ -8,6 +8,7 @@ import 'homeScreen.dart';
 
 late _TabsScreenState tabstate;
 class TabsScreen extends StatefulWidget {
+  static const routeName = "/TabsScreen";
   const TabsScreen({Key? key}) : super(key: key);
 
   @override

@@ -88,7 +88,7 @@ class SudokuGenerator {
         emptyCells = 0;
         break;
       case Difficulty.easy:
-        emptyCells = 40;
+        emptyCells = 2; //needtochange
         break;
       case Difficulty.medium:
         emptyCells = 50;
@@ -134,7 +134,7 @@ class SudokuGeneratorAgorithmV2{
 
     final correctSudoku = sudoku.getSudokuFromString(randomString);
     final toBeSolvedSudoku = sudoku.generateSudoku(randomString, difficulty);
-
+    print('fromSudokuGeneratorAgorithmV2 $correctSudoku');
     return {
       'correctSudoku': correctSudoku,
       'toBeSolvedSudoku': toBeSolvedSudoku,
@@ -143,14 +143,14 @@ class SudokuGeneratorAgorithmV2{
   }
 }
 
-void main() {
-  //final validSudokuString = "864371259325849761971265843436192587198657432257483916689734125713528694542916378";
-  final difficulty = Difficulty.medium;
-  final sudokuPuzzler = SudokuGeneratorAgorithmV2();
-
-  final res = sudokuPuzzler.generatePuzzle(difficulty);
-  print("Solved Sudoku:");
-  sudokuPuzzler.sudoku.printGrid(res['correctSudoku']);
-  print("Puzzle Solved Sudoku:");
-  sudokuPuzzler.sudoku.printGrid(res['toBeSolvedSudoku']);
-}
+// void main() {
+//   //final validSudokuString = "864371259325849761971265843436192587198657432257483916689734125713528694542916378";
+//   final difficulty = Difficulty.medium;
+//   final sudokuPuzzler = SudokuGeneratorAgorithmV2();
+//
+//   final res = sudokuPuzzler.generatePuzzle(difficulty);
+//   print("Solved Sudoku:");
+//   sudokuPuzzler.sudoku.printGrid(res['correctSudoku']);
+//   print("Puzzle Solved Sudoku:");
+//   sudokuPuzzler.sudoku.printGrid(res['toBeSolvedSudoku']);
+// }

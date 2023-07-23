@@ -4,12 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sudokumingle/utils/globalMethodUtil.dart';
+import 'package:sudokumingle/widgets/dualPlayerSudokuGridWidget.dart';
 import 'package:sudokumingle/widgets/sudokuGridWidget.dart';
 import 'package:uuid/uuid.dart';
 
 import '../utils/SudokuBoardEnums.dart';
 import '../utils/constants.dart';
 import '../utils/sudokuGeneratorNewAlgorithm.dart';
+import '../widgets/liveUserWidget.dart';
 import '../widgets/userSearchingWidget.dart';
 
 class PlayWithFriendScreen extends StatefulWidget {
@@ -34,6 +36,15 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
   String _counter = '3';
   bool? _isFirst  ;
   Timestamp screenCreatedAt = Timestamp.now();
+
+  Map<String, int> globalVarliveUsersCountByDifficulty = {
+    'Easy': 0,
+    'Medium': 0,
+    'Hard': 0,
+    'Master': 0,
+    'Grandmaster': 0,
+    'Do Not Try': 0,
+  };
 
   // Map<String, dynamic> puzzleToPass = {
   //   'correctSudoku': [[0]],
@@ -77,7 +88,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
         'difficultyLevel': difficultyLevel,
         'createdAt': screenCreatedAt,
         'inGame': false
-      });
+      }, SetOptions(merge: true),);
 
       print('User data added to ActiveUserPool successfully!');
     } catch (error) {
@@ -143,6 +154,14 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
     searchTimer = Timer.periodic(Duration(seconds: 1), (timer) async {
       QuerySnapshot snapshot = await activeUserPoolCollection.get();
       List<QueryDocumentSnapshot> documents = snapshot.docs.where((doc) => doc.id != currentUserId).toList();
+      Map<String, int> localVarliveUsersCountByDifficulty = {
+        'Easy': 0,
+        'Medium': 0,
+        'Hard': 0,
+        'Master': 0,
+        'Grandmaster': 0,
+        'Do Not Try': 0,
+      };
       for (QueryDocumentSnapshot document in documents) {
         Map<String, dynamic>? documentData = document.data() as Map<String, dynamic>?;
 
@@ -153,6 +172,11 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
           Timestamp createdAt = documentData['createdAt'];
           bool? isGame = documentData['inGame'];
           print('createdAtHere $createdAt');
+
+          if(isGame!=null && isGame == false){
+            localVarliveUsersCountByDifficulty[difficultyLevelOfUser] = 1 + localVarliveUsersCountByDifficulty[difficultyLevelOfUser]!;
+          }
+
           if (difficultyLevelOfUser == difficulty && isGame!=null && isGame == false) {
             // The difficulty level matches, perform your desired action
             print('User found in ActiveUserPool: $userId - $username - $difficultyLevelOfUser - $createdAt');
@@ -177,6 +201,9 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
           }
         }
       }
+      setState(() {
+        globalVarliveUsersCountByDifficulty = localVarliveUsersCountByDifficulty;
+      });
 
       print('Data fetched - No user found');
     });
@@ -329,7 +356,14 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
         'winnerId': '',
         'createdAt': screenCreatedAt,
         'endedAt': screenCreatedAt,
-        'createdBy': currentUser!.uid
+        'createdBy': currentUser!.uid,
+        'player1Points': 0,
+        'player2Points': 0,
+        'player1Mistake': 0,
+        'player2Mistake': 0,
+        'isScoreUpdate1': false,
+        'isScoreUpdate2': false,
+        'isGameEnded': false
       });
 
       print('ActiveGamePool Created!');
@@ -448,6 +482,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
     fetchPuzzleForGame(puzzleId!);
 
   }
+
   void setCurrentUserFromActiveUserPoolTrue(){
     if (currentUser == null) {
       return;
@@ -531,24 +566,26 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
 
   }
 
-  fetchUserFromActiveGamePoolContinuously() async{
-    // print('fetching Game is Active $gameId for puzzle ${widget.activePuzzleId}');
-    CollectionReference activeUserPoolCollection = FirebaseFirestore.instance.collection('ActiveGamePool');
-    DocumentSnapshot snapshot = await activeUserPoolCollection.doc(gameId).get();
-    if(!snapshot.exists){
-      // Navigator.pop(context);
-      setState(() {
-        _isGameOver = true;
-      });
-    }
-  }
-
-  void deleteFromActiveGamePool() async{
-    print('Game Over');
-    FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_GAME_POOL, gameId!);
-    FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_PUZZLE_POOL,  puzzleId!);
-    print('Game deleted');
-  }
+  // fetchUserFromActiveGamePoolContinuously() async{
+  //   // print('fetching Game is Active $gameId for puzzle ${widget.activePuzzleId}');
+  //   CollectionReference activeUserPoolCollection = FirebaseFirestore.instance.collection('ActiveGamePool');
+  //   DocumentSnapshot snapshot = await activeUserPoolCollection.doc(gameId).get();
+  //   if(!snapshot.exists){
+  //     //Navigator.pop(context);
+  //     print('opponent skipped');
+  //     setState(() {
+  //       _isGameOver = true;
+  //
+  //     });
+  //   }
+  // }
+  //
+  // void deleteFromActiveGamePool() async{
+  //   print('Game Over');
+  //   FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_GAME_POOL, gameId!);
+  //   FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_PUZZLE_POOL,  puzzleId!);
+  //   print('Game deleted');
+  // }
 
   @override
   void initState() {
@@ -565,7 +602,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
   void dispose() {
     searchTimer?.cancel();
     removeCurrentUserFromActiveUserPool();
-    deleteFromActiveGamePool();
+    // deleteFromActiveGamePool();
     WidgetsBinding.instance?.removeObserver(this);
     //super.dispose();
   }
@@ -583,9 +620,9 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
 
   @override
   Widget build(BuildContext context) {
-    if(gameId!=null){
-      fetchUserFromActiveGamePoolContinuously();
-    }
+    // if(gameId!=null){
+    //   fetchUserFromActiveGamePoolContinuously();
+    // }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
@@ -602,8 +639,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                 : const Text( 'Puzzle Loading')
       ),
       body:  _isGameOver
-          ? Center(child: Text('Textgame is over now'))
-
+          ? const Center(child: Text('Textgame is over now'))
           : _isInActiveUserTable
           ? Center(
             child: Column(
@@ -622,13 +658,14 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                     ? UserSearchingWidget(milliSecondsDelayTime: 100, searching: true,)
                     : UserSearchingWidget(milliSecondsDelayTime: 3000, searching: true,),
                 SizedBox(height: 20,),
+                LiveUserWidget(liveUserData: globalVarliveUsersCountByDifficulty,)
               ],
             ),
           )
           : _isGameStarted
             ? _isLoading
                 ? Center(child: Text(_counter, style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),),)
-                : SudokuGridWidget(
+                : DualPlayerSudokuGridWidget(
                     generatedSudoku: {
                       'correctSudoku': correctSudokuToPass,
                         'toBeSolvedSudoku': toBeSolvedSudokuToPass,
@@ -637,6 +674,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                     isMultiplayer: true,
                     activeGameId: gameId ?? '',
                     activePuzzleId: puzzleId ?? '',
+                    isPlayer1: _isFirst!,
                   )
                // : UserSearchingWidget(milliSecondsDelayTime: 100000000, searching: false, userAvatarIndex: 9,)
             : Center(child:

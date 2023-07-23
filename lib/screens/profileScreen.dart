@@ -16,11 +16,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).secondaryHeaderColor,
-        title: const Text(
+        title: Text(
             'Profile',
             style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.teal
+            color: Theme.of(context).primaryColor
         ),
         ),
         actions: [

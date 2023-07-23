@@ -15,7 +15,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
         title: Text('Statistics Screen',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.teal
+            color: Theme.of(context).primaryColor
           ),
         ),
         backgroundColor: Theme.of(context).secondaryHeaderColor,

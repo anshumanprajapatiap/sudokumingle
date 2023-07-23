@@ -54,9 +54,6 @@ class _PraticeOfflineSudokuScreenState extends State<PraticeOfflineSudokuScreen>
 
       body: SudokuGridWidget(
         generatedSudoku: su,
-        isMultiplayer: false,
-        activeGameId: '',
-        activePuzzleId: '',
       ),
 
     );

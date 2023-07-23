@@ -13,15 +13,9 @@ import '../utils/globalMethodUtil.dart';
 
 class SudokuGridWidget extends StatefulWidget {
   final Map<String, dynamic> generatedSudoku;
-  final bool isMultiplayer;
-  final String activeGameId;
-  final String activePuzzleId;
 
   SudokuGridWidget({
     required this.generatedSudoku,
-    required this.isMultiplayer,
-    required this.activeGameId,
-    required this.activePuzzleId
   });
 
   @override
@@ -43,6 +37,18 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     audioCache?.play('assets/audio/alert_sound.mp3');
   }
 
+  int countEmptyCells() {
+    int emptyCellCount = 0;
+    for (int row = 0; row < 9; row++) {
+      for (int col = 0; col < 9; col++) {
+        if (sudokuGrid[row][col] == null) {
+          emptyCellCount++;
+        }
+      }
+    }
+    return emptyCellCount;
+  }
+
   List<List<Color>> sudokuGridColors = List.generate(9, (_) => List.filled(9, Colors.transparent));
   List<List<int?>> sudokuGrid = List.generate(9, (_) => List.filled(9, null));
   List<List<int>> sudokuGridCorrect = List.generate(9, (_) => List.filled(9, 0));
@@ -56,6 +62,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   Difficulty? difficultyLevel;
   int numberOfMistakes = 0;
   int scoreTillNow = 0;
+  int numberOfEmptyCell = 81;
 
   late Timer timer;
   Duration elapsedTime = Duration.zero;
@@ -139,7 +146,6 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if(!widget.isMultiplayer){
       if (state == AppLifecycleState.paused) {
         pauseTimer();
         if (numberOfMistakes >= 3) {
@@ -147,7 +153,9 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
             context: context,
             barrierDismissible: false,
             builder: (context) => buildMaxMistakesDialog(),
-          );
+          ).then((value) {
+            Navigator.of(context).pop();
+          });
         } else if (isPaused) {
           // showDialog(
           //   context: context,
@@ -160,7 +168,6 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
       // else if (state == AppLifecycleState.resumed) {
       //   resumeTimer();
       // }
-    }
   }
 
   @override
@@ -197,6 +204,10 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     sudokuGridCorrect = widget.generatedSudoku['correctSudoku'];
     sudokuGrid = widget.generatedSudoku['toBeSolvedSudoku'];
     difficultyLevel = widget.generatedSudoku['difficulty'];
+    int emptyCellCount = countEmptyCells();
+    print('Number of empty cells: $emptyCellCount');
+    numberOfEmptyCell = emptyCellCount;
+    print('Number of empty after initializeSudoku: $numberOfEmptyCell');
   }
 
   void fillCell(int row, int col, int number) {
@@ -252,32 +263,24 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
         return;
       }
       scoreTillNow = scoreTillNow + number;
+      numberOfEmptyCell = numberOfEmptyCell - 1;
       fillCell(activeCellRow!, activeCellCol!, number);
+      if(numberOfEmptyCell==0){
+        print('gameOver');
+        showGameOverDialog(context);
+      }
     }
   }
 
-  AlertDialog buildMaxMistakesDialog() {
-    if(widget.isMultiplayer){
 
-    }
+  AlertDialog buildMaxMistakesDialog() {
     return AlertDialog(
       title: Text('Maximum Mistakes Reached'),
       content: Text('You have made 3 mistakes. Do you want to restart the game or go back?'),
       actions: [
         Center(
           child: Row(
-            children: widget.isMultiplayer
-                ? [
-                    TextButton(
-                      onPressed: () {
-                      // Go back
-                        //deleteFromActiveGamePool();
-                        Navigator.pop(context);
-                      },
-                      child: Text('Go Back'),
-                    ),
-                  ]
-                : [
+            children: [
                     TextButton(
                       onPressed: () {
                         // Restart game
@@ -301,6 +304,125 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
           ),
         )
       ],
+    );
+  }
+
+  void showGameOverDialog(BuildContext context) {
+    final double dialogHeight = MediaQuery.of(context).size.height * 0.8;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return WillPopScope(
+              onWillPop: () async {
+                // Prevent dialog from closing on back press
+                return false;
+              },
+              child: AlertDialog(
+                title: Text('Game Over',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold
+                  ),
+                ),
+                content: Container(
+                  height: dialogHeight * 0.5,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Column(
+                            children: [
+                              Text('Mistakes',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold
+                                ),
+                              ),
+                              Text('$numberOfMistakes/3',
+
+                              ),
+                            ],
+                          ),
+                          SizedBox(width: 20),
+                          Column(
+                            children: [
+                              Text('Time',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold
+                                ),
+                              ),
+                              Text('${_formatElapsedTime(elapsedTime)}',
+
+                              ),
+                            ],
+                          ),
+                          SizedBox(width: 20),
+                          Column(
+                            children: [
+                              Text('Difficulty',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold
+                                ),
+                              ),
+                              Text('${difficultyLevel?.name}',
+
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      // Image of 150x150
+                      SizedBox(height: 20,),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        height: MediaQuery.of(context).size.width * 0.7,
+                        child: Container(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                actions: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          // Resume game
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        },
+                        child: Text('Exit'),
+                      ),
+                      ElevatedButton(
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)
+                        ),
+                        onPressed: () {
+                          // Resume game
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (_) => PraticeOfflineSudokuScreen(difficultyLevel: difficultyLevel as Difficulty,))
+                          );
+                        },
+                        child: Text('Play Again'),
+                      ),
+
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -420,36 +542,14 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     );
   }
 
-  // fetchUserFromActiveGamePoolContinuously(String gameId) async{
-  //   print('fetching Game is Active $gameId for puzzle ${widget.activePuzzleId}');
-  //   CollectionReference activeUserPoolCollection = FirebaseFirestore.instance.collection('ActiveGamePool');
-  //   DocumentSnapshot snapshot = await activeUserPoolCollection.doc(gameId).get();
-  //   if(!snapshot.exists){
-  //     Navigator.pop(context);
-  //   }
-  // }
-  //
-  // void deleteFromActiveGamePool() async{
-  //   print('Game Over');
-  //   FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_GAME_POOL, widget.activeGameId);
-  //   FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_PUZZLE_POOL, widget.activePuzzleId);
-  //   print('Game deleted');
-  // }
+
 
   @override
   Widget build(BuildContext context) {
-    if(widget.isMultiplayer){
-      //fetchUserFromActiveGamePoolContinuously(widget.activeGameId);
-    }
 
     return WillPopScope(
       onWillPop: () async {
-        if(widget.isMultiplayer){
-          //deleteFromActiveGamePool();
-        }
-        else{
-          pauseTimer();
-        }
+        pauseTimer();
         return true;
       },
       child: _isLoading
@@ -479,18 +579,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                           fontWeight: FontWeight.bold
                       ),
                     ),
-                    widget.isMultiplayer
-                        ? TextButton.icon(
-                      onPressed: (){},
-                      label: Text(
-                        _formatElapsedTime(elapsedTime),
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold
-                        ),
-                      ),
-                      icon: Icon(Icons.timer, weight: 700,),
-                    )
-                        : TextButton.icon(
+                    TextButton.icon(
                       onPressed: isPaused ? resumeTimer : pauseTimer,
                       label: Text(
                         _formatElapsedTime(elapsedTime),
@@ -596,82 +685,6 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                     },
                   ),
                 ),
-                SizedBox(height: 15),
-
-                // RESET, ERASE, NOTES, HINT
-                // Padding(
-                //   padding: EdgeInsets.symmetric(horizontal: 8.0),
-                //   child: Row(
-                //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                //     children: [
-                //       TextButton(
-                //         onPressed: () {
-                //           // Handle reset button tap here
-                //         },
-                //         style: TextButton.styleFrom(
-                //             padding: EdgeInsets.all(8), //// Remove default padding
-                //         ),
-                //         child: Column(
-                //           mainAxisSize: MainAxisSize.min,
-                //           children: [
-                //             Icon(Icons.restore),
-                //             SizedBox(height: 4),
-                //             Text('Reset'),
-                //           ],
-                //         ),
-                //       ),
-                //       TextButton(
-                //         onPressed: () {
-                //           // Handle erase button tap here
-                //         },
-                //         style: TextButton.styleFrom(
-                //             padding: EdgeInsets.all(8), //// Remove default padding
-                //         ),
-                //         child: Column(
-                //           mainAxisSize: MainAxisSize.min,
-                //           children: [
-                //             Icon(Icons.backspace),
-                //             SizedBox(height: 4),
-                //             Text('Erase'),
-                //           ],
-                //         ),
-                //       ),
-                //       TextButton(
-                //         onPressed: () {
-                //           // Handle notes button tap here
-                //         },
-                //         style: TextButton.styleFrom(
-                //           padding: EdgeInsets.all(8), //// Remove default padding
-                //         ),
-                //         child: Column(
-                //           mainAxisSize: MainAxisSize.min,
-                //           children: [
-                //             Icon(Icons.note),
-                //             SizedBox(height: 4),
-                //             Text('Notes'),
-                //           ],
-                //         ),
-                //       ),
-                //       TextButton(
-                //         onPressed: () {
-                //           // Handle hint button tap here
-                //         },
-                //         style: TextButton.styleFrom(
-                //           padding: EdgeInsets.all(8), // Remove default padding
-                //         ),
-                //         child: Column(
-                //           mainAxisSize: MainAxisSize.min,
-                //           children: [
-                //             Icon(Icons.lightbulb),
-                //             SizedBox(height: 4),
-                //             Text('Hint'),
-                //           ],
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                SizedBox(height: 30),
 
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10.0),
