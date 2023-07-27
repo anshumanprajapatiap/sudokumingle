@@ -29,6 +29,7 @@ class _TabsScreenState extends State<TabsScreen> {
   final List<Map<String, dynamic>> _pages = [
     {'page':StatisticsScreen(), 'title':'Stats'},
     {'page':HomeScreen(), 'title':'Home'},
+    // {'page': SudokuGeneratorScreen(), 'title':'Testing'},
     {'page':ProfileScreen(), 'title':'Profile'},
   ];
   void _selectedPage(int idx) {
@@ -52,12 +53,12 @@ class _TabsScreenState extends State<TabsScreen> {
             _selectedIndex = idx;
           });
         },
-        selectedItemColor: Colors.blueGrey[900],
-        unselectedItemColor: Colors.blueGrey,
+        selectedItemColor: Theme.of(context).primaryColor,
+        unselectedItemColor: Theme.of(context).primaryColor.withOpacity(0.5),
         showSelectedLabels: false,
         showUnselectedLabels: false,
         iconSize: MediaQuery.of(context).size.width*0.07,
-        items: <BottomNavigationBarItem>[
+        items: const <BottomNavigationBarItem>[
           /// Home
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
@@ -69,6 +70,10 @@ class _TabsScreenState extends State<TabsScreen> {
             icon: Icon(Icons.home),
             label: 'Home'
           ),
+          // BottomNavigationBarItem(
+          //     icon: Icon(Icons.home),
+          //     label: 'Home2'
+          // ),
           /// Split
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle_outlined),

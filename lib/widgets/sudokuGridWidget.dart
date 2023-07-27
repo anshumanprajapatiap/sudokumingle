@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sudokumingle/providers/darkThemeProvider.dart';
 import 'package:sudokumingle/screens/homeScreen.dart';
 import 'package:sudokumingle/screens/praticeOfflineScreen.dart';
 import 'package:sudokumingle/utils/SudokuBoardEnums.dart';
@@ -76,10 +78,10 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     });
   }
 
-  void setNonActiveCell(int row, int col, int val) {
+  void setNonActiveCell(int row, int col, int val, bool isDarkMode) {
     setState(() {
       isNonActiveIsActive = true;
-      final tappedColor = Colors.blueGrey.shade100; // Change to the desired shade of grey
+      final tappedColor = isDarkMode ? Colors.blueGrey : Colors.blueGrey.shade100; // Change to the desired shade of grey
 
       // Update colors of the row and column
       for (int i = 0; i < 9; i++) {
@@ -100,7 +102,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
           if(val == sudokuGrid[i][j]) sudokuGridColors[i][j] = tappedColor;
         }
       }
-      sudokuGridColors[row][col] = Colors.blueGrey.shade50;
+      sudokuGridColors[row][col] = isDarkMode ? Colors.black12 : Colors.white;
     });
   }
 
@@ -547,6 +549,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   @override
   Widget build(BuildContext context) {
 
+    final themeProvider = Provider.of<ThemeSwitchProvider>(context);
+
     return WillPopScope(
       onWillPop: () async {
         pauseTimer();
@@ -566,17 +570,20 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                   children: [
                     Text(difficultyLevel!.name,
                       style: TextStyle(
-                        fontWeight: FontWeight.bold
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor
                       ),
                     ),
                     Text('Score: $scoreTillNow',
                         style: TextStyle(
-                          fontWeight: FontWeight.bold
+                          fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor
                       ),
                     ),
                     Text('Mistakes: $numberOfMistakes/3',
                       style: TextStyle(
-                          fontWeight: FontWeight.bold
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor
                       ),
                     ),
                     TextButton.icon(
@@ -584,10 +591,15 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                       label: Text(
                         _formatElapsedTime(elapsedTime),
                         style: TextStyle(
-                            fontWeight: FontWeight.bold
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor
                         ),
                       ),
-                      icon: Icon(isPaused ? Icons.play_arrow : Icons.pause, weight: 700,),
+                      icon: Icon(
+                          isPaused ? Icons.play_arrow : Icons.pause,
+                          weight: 700,
+                          color: Theme.of(context).primaryColor
+                      ),
                     ),
                   ],
                 ),
@@ -618,7 +630,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                           ? Colors.black
                           : Colors.blueGrey;
 
-                      final tappedColor = Colors.blueGrey.shade100; // Change this to the desired color
+                      final tappedColor = themeProvider.isDarkMode ? Colors.blueGrey.shade400 : Colors.blueGrey.shade100; // Change this to the desired color
 
                       Color cellColor = isActiveCell ? Colors.blueGrey : Colors.grey.withOpacity(0.1);
                       cellColor = isNonActiveIsActive ? sudokuGridColors[row][col]: cellColor;
@@ -643,7 +655,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                           }
                           else {
                               resetNonActiveCell();
-                              setNonActiveCell(row, col, cellValue!);
+                              setNonActiveCell(row, col, cellValue!, themeProvider.isDarkMode);
                           }
                         },
                         child: Stack(
@@ -658,12 +670,15 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
 
                                 ),
                                 color: cellColor,
-                                //fontWeight: isBoldCell ? FontWeight.bold : FontWeight.normal,
+                                // fontWeight: true ? FontWeight.bold : FontWeight.normal,
                               ),
                               child: Center(
                                 child: Text(
                                   cellValue != null ? cellValue.toString() : '',
-                                  style: TextStyle(fontSize: 20),
+                                  style: TextStyle(
+                                      color: themeProvider.isDarkMode ? Colors.white : Colors.blueGrey ,
+                                      fontSize: 20
+                                  ),
                                 ),
                               ),
                             ),
@@ -697,8 +712,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                           fillCellWithNumber(number);
                         },
                         child: Container(
-                          width: 35,
-                          height: 35,
+                          width: 36,
+                          height: 36,
                           decoration: BoxDecoration(
                             color: Theme.of(context).primaryColor,
                             borderRadius: BorderRadius.circular(8.0),
@@ -706,7 +721,10 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                           child: Center(
                             child: Text(
                               number.toString(),
-                              style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 16, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  // color: Theme.of(context).secondaryHeaderColor,
+                                  color: Colors.white,
+                                  fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -722,7 +740,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
               child: Container(
                 color: Theme.of(context).primaryColor,
                 child: Center(
-                    child: Text('space for banner adds')
+                    child: Text('')
                 ),
               ),
             ),

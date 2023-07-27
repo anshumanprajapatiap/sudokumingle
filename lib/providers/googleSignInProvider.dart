@@ -61,7 +61,7 @@ class GoogleSignInProvider extends ChangeNotifier {
         final newUserData = {
           'name': _currentUser!.displayName,
           'email': _currentUser!.email,
-          'mingleCoins': 0,
+          'mingleCoins': 1500,
           'rank': 0,
           'isPro': false,
         };

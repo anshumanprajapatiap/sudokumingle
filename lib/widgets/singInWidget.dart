@@ -39,11 +39,15 @@ class _GoogleSignInWidgetState extends State<GoogleSignInWidget> {
           icon: const FaIcon(FontAwesomeIcons.google, color: Colors.white,),
           label: const Text('SignIn with the Google'),
           style: ElevatedButton.styleFrom(
-            //foregroundColor: Colors.white,
-            //backgroundColor: Colors.indigo,
+            foregroundColor: Colors.white,
+            backgroundColor: Theme.of(context).primaryColor.withAlpha(1000),
             maximumSize: const Size(double.infinity, 100),
             elevation: 10,
             padding: EdgeInsets.all(12),
+            minimumSize: Size(
+                MediaQuery.sizeOf(context).width*0.8,
+                50
+            )
           ),
         );
       }

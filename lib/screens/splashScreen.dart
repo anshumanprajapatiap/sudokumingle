@@ -16,53 +16,68 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget content = Container(
       color: Theme.of(context).primaryColor,
-      padding: EdgeInsets.all(40.0),
+      padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 0),
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height,
       child: Center(
         child: Column(
           //crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Image.asset('assets/images/logo/sudoku-mingle-3.png'),
-            SizedBox(height: 30,),
+            Image.asset('assets/images/logo/sudoku-mingle-3.png',
+              width: MediaQuery.of(context).size.width*0.5,
+            ),
+            //SizedBox(height: 30,),
             Text(
               'Sudoku Mingle',
-              style: Theme.of(context).textTheme.titleLarge,)
+              style: TextStyle(
+                color: Theme.of(context).secondaryHeaderColor,
+                fontSize: 30,
+                fontWeight: FontWeight.bold
+              ),
+            )
             ,
-            SizedBox(height: 10,),
+
             Row(
               children: [
                 Expanded(
                   child: Container(
                     margin: const EdgeInsets.only(left: 0.0, right: 10),
-                    child: const Divider(
+                    child: Divider(
                       color: Colors.white,
-                      height: 80,
+                      height: MediaQuery.sizeOf(context).height*0.1,
                     ),
                   ),
                 ),
                 Text(
                   'Play With Your Sudoku Partner',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: TextStyle(
+                      color: Theme.of(context).secondaryHeaderColor,
+                      fontWeight: FontWeight.normal,
+                      fontSize: 15
+                  ),
                 ),
 
                 Expanded(
                   child: Container(
                     margin: const EdgeInsets.only(left: 10.0, right: 0),
-                    child: const Divider(
+                    child: Divider(
                       color: Colors.white,
-                      height: 80,
+                      height: MediaQuery.sizeOf(context).height*0.1,
                     ),
                   ),
                 ),
               ],
             ),
 
-            SizedBox(height: 10,),
+            SizedBox(height: MediaQuery.sizeOf(context).height*0.2,),
             Text(
               'By Mingle Bytes',
-              style: Theme.of(context).textTheme.titleMedium,
+              style: TextStyle(
+                color: Theme.of(context).secondaryHeaderColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 20
+              ),
             ),
           ],
         ),

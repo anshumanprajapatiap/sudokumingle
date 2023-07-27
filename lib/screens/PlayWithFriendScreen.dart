@@ -24,6 +24,7 @@ class PlayWithFriendScreen extends StatefulWidget {
 }
 
 class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with WidgetsBindingObserver{
+  bool hideBackButton = true;
   String difficulty = "";
   bool _isLoading = true;
   bool _isInActiveUserTable = true;
@@ -144,6 +145,9 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
   }
 
   void fetchUserFromActivePoolContinuously() async {
+    setState(() {
+      hideBackButton = true;
+    });
     String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
     if (currentUserId == null) {
@@ -179,6 +183,9 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
 
           if (difficultyLevelOfUser == difficulty && isGame!=null && isGame == false) {
             // The difficulty level matches, perform your desired action
+            setState(() {
+              hideBackButton = false;
+            });
             print('User found in ActiveUserPool: $userId - $username - $difficultyLevelOfUser - $createdAt');
             // Stop searching by canceling the timer
             searchTimer?.cancel();
@@ -363,7 +370,9 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
         'player2Mistake': 0,
         'isScoreUpdate1': false,
         'isScoreUpdate2': false,
-        'isGameEnded': false
+        'isGameEnded': false,
+        'isSkippedPlayer1': false,
+        'isSkippedPlayer2': false,
       });
 
       print('ActiveGamePool Created!');
@@ -559,6 +568,12 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
       setState(() {
         _isLoading = false;
       });
+
+      Timer(Duration(seconds: 5), () {
+        setState(() {
+          hideBackButton = true;
+        });
+      });
     } else {
       print('Document with ID $player2UserId does not exist');
       fetchUserFromActivePoolContinuously();
@@ -580,12 +595,26 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
   //   }
   // }
   //
-  // void deleteFromActiveGamePool() async{
-  //   print('Game Over');
-  //   FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_GAME_POOL, gameId!);
-  //   FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_PUZZLE_POOL,  puzzleId!);
-  //   print('Game deleted');
-  // }
+
+
+  void deleteFromActiveGamePool() async{
+    try{
+      FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_GAME_POOL, gameId!);
+    }catch(e){
+      print('All ready deleted from ACTIVE_GAME_POOL');
+    }
+    try{
+      FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_PUZZLE_POOL, puzzleId!);
+    }catch(e){
+      print('All ready deleted from ACTIVE_PUZZLE_POOL');
+    }
+    try{
+      FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_USER_POOL, currentUser!.uid);
+    }catch(e){
+      print('All ready deleted from ACTIVE_USER_POOL');
+    }
+
+  }
 
   @override
   void initState() {
@@ -602,7 +631,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
   void dispose() {
     searchTimer?.cancel();
     removeCurrentUserFromActiveUserPool();
-    // deleteFromActiveGamePool();
+    deleteFromActiveGamePool();
     WidgetsBinding.instance?.removeObserver(this);
     //super.dispose();
   }
@@ -625,6 +654,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
     // }
     return Scaffold(
       appBar: AppBar(
+          automaticallyImplyLeading: hideBackButton, // Hide the back button based on the hideBackButton variable
         backgroundColor: Theme.of(context).primaryColor,
         title: _isInActiveUserTable
             ? _isSeaching
@@ -649,7 +679,8 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                 Text(
                     'Selected difficulty Level ${DifficultyEnumToString(widget.difficultyLevel).name}',
                   style: TextStyle(
-                    //color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.bold,
                     fontSize: 20
                   ),
                 ),

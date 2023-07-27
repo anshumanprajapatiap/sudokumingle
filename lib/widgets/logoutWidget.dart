@@ -18,10 +18,16 @@ class LogoutWidget extends StatelessWidget {
                 });
               },
               child: Row(
-                children: [
-                  Icon(Icons.exit_to_app_rounded,),
-                  Text('SignOut')
-                ],
+                children:[
+                  Text(
+                      'SignOut',
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                ]
               )
           );
         }

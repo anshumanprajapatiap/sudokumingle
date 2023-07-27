@@ -46,7 +46,7 @@ class ScrollableCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration:const BoxDecoration(
         image: DecorationImage(
           image: AssetImage('assets/images/carosuelBGImage.png'),
           fit: BoxFit.cover,
@@ -54,24 +54,39 @@ class ScrollableCarousel extends StatelessWidget {
       ),
       height: MediaQuery.of(context).size.height * 0.25,
       width: MediaQuery.of(context).size.width,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: cards.length,
-        itemBuilder: (BuildContext context, int index) {
-          return GestureDetector(
-            onTap: () {
-              // Handle card tap here
-              _showConfirmationDialog(context, cards[index]);
-              //print('Card $index tapped');
+      child: cards.isEmpty
+          ?  Card(
+              color: Theme.of(context).secondaryHeaderColor,
+              child: Center(
+                  child:  Text(
+                      'No Active Contest',
+                    style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold
+
+                    ),
+                  )
+              ),
+            )
+          : ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: cards.length,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                onTap: () {
+                  // Handle card tap here
+                  _showConfirmationDialog(context, cards[index]);
+                  //print('Card $index tapped');
+                },
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: cards[index],
+                ),
+              );
             },
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.6,
-              margin: EdgeInsets.symmetric(horizontal: 8.0),
-              child: cards[index],
-            ),
-          );
-        },
-      ),
+          ),
     );
   }
 }

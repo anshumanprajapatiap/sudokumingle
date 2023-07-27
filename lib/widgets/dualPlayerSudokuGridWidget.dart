@@ -4,13 +4,16 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sudokumingle/screens/bottomNavigationBar.dart';
 import 'package:sudokumingle/screens/homeScreen.dart';
 import 'package:sudokumingle/screens/praticeOfflineScreen.dart';
 import 'package:sudokumingle/utils/SudokuBoardEnums.dart';
 import 'package:sudokumingle/utils/constants.dart';
+import 'package:uuid/uuid.dart';
 
 import '../main.dart';
+import '../providers/darkThemeProvider.dart';
 import '../utils/globalMethodUtil.dart';
 
 class DualPlayerSudokuGridWidget extends StatefulWidget {
@@ -89,10 +92,10 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
     });
   }
 
-  void setNonActiveCell(int row, int col, int val) {
+  void setNonActiveCell(int row, int col, int val, bool isDarkMode) {
     setState(() {
       isNonActiveIsActive = true;
-      final tappedColor = Colors.blueGrey.shade100; // Change to the desired shade of grey
+      final tappedColor = isDarkMode ? Colors.blueGrey : Colors.blueGrey.shade100;// Change to the desired shade of grey
 
       // Update colors of the row and column
       for (int i = 0; i < 9; i++) {
@@ -113,7 +116,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
           if(val == sudokuGrid[i][j]) sudokuGridColors[i][j] = tappedColor;
         }
       }
-      sudokuGridColors[row][col] = Colors.blueGrey.shade50;
+      sudokuGridColors[row][col] = isDarkMode ? Colors.black12 : Colors.white;
     });
   }
 
@@ -318,7 +321,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
 
   void showGameOverDialog(BuildContext context, bool error) {
     final double dialogHeight = MediaQuery.of(context).size.height * 0.8;
-    Widget winnerShow = const Text('Results are waiting for you');
+    Widget winnerShow = const Text('Click Exit to Show Results');
 
 
     showDialog(
@@ -363,11 +366,6 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                         onPressed: () {
                           // Exit
                           Navigator.pop(context);
-                          // Navigator.pop(context);
-                          //GlobalMethodUtil.canPop(context);
-                          // Navigator.pop(context);
-                          //Navigator.popUntil(context, ModalRoute.withName('/TabsScreen'));
-                          //Navigator.pushReplacementNamed(context, TabsScreen.routeName);
                         },
                         child: Text('Exit'),
                       )
@@ -378,65 +376,6 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
               ),
             );
           },
-
-      // builder: (BuildContext context) {
-      //   return StatefulBuilder(
-      //     builder: (context, setState) {
-      //       return WillPopScope(
-      //         onWillPop: () async {
-      //           // Prevent dialog from closing on back press
-      //           return false;
-      //         },
-      //         child: AlertDialog(
-      //                 title: const Text('Game Ended!!',
-      //                   style: TextStyle(
-      //                       fontWeight: FontWeight.bold
-      //                   ),
-      //                 ),
-      //                 content: Container(
-      //                   height: dialogHeight * 0.6,
-      //                   child: Column(
-      //                     mainAxisAlignment: MainAxisAlignment.center,
-      //                     crossAxisAlignment: CrossAxisAlignment.center,
-      //                     children: [
-      //                       winnerShow,
-      //                       // Image of 150x150
-      //                       const SizedBox(height: 20,),
-      //                       SizedBox(
-      //                         width: MediaQuery.of(context).size.width * 0.8,
-      //                         height: dialogHeight* 0.5,
-      //                         child: Container(
-      //                           color: Theme.of(context).primaryColor,
-      //                         ),
-      //                       )
-      //                     ],
-      //                   ),
-      //                 ),
-      //                 actions: [
-      //                   Row(
-      //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //                     children: [
-      //                       TextButton(
-      //                         onPressed: () {
-      //                           // Exit
-      //                           Navigator.pop(context);
-      //                           // Navigator.pop(context);
-      //                           //GlobalMethodUtil.canPop(context);
-      //                           // Navigator.pop(context);
-      //                           //Navigator.popUntil(context, ModalRoute.withName('/TabsScreen'));
-      //                           //Navigator.pushReplacementNamed(context, TabsScreen.routeName);
-      //                         },
-      //                         child: Text('Exit'),
-      //                       )
-      //
-      //                     ],
-      //                   ),
-      //                 ],
-      //               ),
-      //       );
-      //     },
-      //   );
-      // },
     );
   }
 
@@ -466,37 +405,37 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
     }
   }
 
-  void deleteFromActiveGamePool() async{
-    try{
-      FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_GAME_POOL, widget.activeGameId);
-    }catch(e){
-      print('All ready deleted from ACTIVE_GAME_POOL');
-    }
-    try{
-      FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_PUZZLE_POOL, widget.activePuzzleId);
-    }catch(e){
-      print('All ready deleted from ACTIVE_PUZZLE_POOL');
-    }
-    try{
-      FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_USER_POOL, currentUser!.uid);
-    }catch(e){
-      print('All ready deleted from ACTIVE_USER_POOL');
-    }
-
-  }
+  // void deleteFromActiveGamePool() async{
+  //   try{
+  //     FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_GAME_POOL, widget.activeGameId);
+  //   }catch(e){
+  //     print('All ready deleted from ACTIVE_GAME_POOL');
+  //   }
+  //   try{
+  //     FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_PUZZLE_POOL, widget.activePuzzleId);
+  //   }catch(e){
+  //     print('All ready deleted from ACTIVE_PUZZLE_POOL');
+  //   }
+  //   try{
+  //     FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_USER_POOL, currentUser!.uid);
+  //   }catch(e){
+  //     print('All ready deleted from ACTIVE_USER_POOL');
+  //   }
+  //
+  // }
 
   void writeOnCustomUserProfile(String player1UserId, String player2UserId,
       Timestamp screenCreatedAt, Timestamp endedAt,
       int player1Points, int player2Points, int player1Mistake, int player2Mistake) async {
     try {
       // Reference to the ActiveUserPool collection
-
+      String gId = Uuid().v4();
       CollectionReference passiveUserGamePoolCollection = FirebaseFirestore.instance
           .collection(Constants.CUSTOM_USER_PROFILE)
           .doc(currentUser!.uid)
           .collection(Constants.USER_GAME_HISTORY);
       // Create a document with the current user ID as the document ID
-      DocumentReference userGameDocument = passiveUserGamePoolCollection.doc(widget.activeGameId);
+      DocumentReference userGameDocument = passiveUserGamePoolCollection.doc(gId);
 
       // Set the data for the user document
       await userGameDocument.set({
@@ -521,7 +460,46 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
 
   }
 
-  void calculateWinnerMethod(int player1Points, int player2Points, int player1Mistake, int player2Mistake, String player1UserId, String player2UserId) {
+  void calculateWinnerMethod(
+      int player1Points, int player2Points,
+      int player1Mistake, int player2Mistake,
+      String player1UserId, String player2UserId,
+      {required bool isSkippedByPlayer1, required bool isSkippedByPlayer2}) {
+
+    if(isSkippedByPlayer1 || isSkippedByPlayer2){
+      print('isSkippedByPlayer1 $isSkippedByPlayer1');
+      print('isSkippedByPlayer2 $isSkippedByPlayer2');
+
+      if(isSkippedByPlayer1 && currentUser!.uid==player1UserId){
+        setState(() {
+          winnerId = player2UserId;
+        });
+      }
+      else if(isSkippedByPlayer2 && currentUser!.uid==player2UserId){
+        setState(() {
+          winnerId = player1UserId;
+        });
+      }
+      else if(isSkippedByPlayer1 && currentUser!.uid==player2UserId){
+        setState(() {
+          winnerId = player2UserId;
+        });
+      }
+      else if(isSkippedByPlayer2 && currentUser!.uid==player1UserId){
+        setState(() {
+          winnerId = player1UserId;
+        });
+      }
+      else{
+        setState(() {
+          winnerId = 'MATCH_DRAW';
+        });
+      }
+
+      return;
+    }
+
+
     if(player1Points>player2Points){
       setState(() {
         winnerId = player1UserId;
@@ -556,14 +534,21 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
       _isLoading = true;
     });
     DocumentReference activeGameDocRef = FirebaseFirestore.instance.collection(Constants.ACTIVE_GAME_POOL).doc(widget.activeGameId);
+
+    bool min5Passed = true;
+    Timer(Duration(seconds: 5), () {
+      min5Passed = false;
+    });
+
     if(widget.isPlayer1){
       await activeGameDocRef.update({
         'player1Points': scoreTillNow,
         'player1Mistake': numberOfMistakes,
         'isScoreUpdate1': true,
+        'isSkippedPlayer1': isSkippedByThisUser,
         'endedAt':Timestamp.now()
       });
-      while(true){
+      while(min5Passed){
         DocumentSnapshot activeGameDocSnapshot = await FirebaseFirestore.instance.collection(Constants.ACTIVE_GAME_POOL).doc(widget.activeGameId).get();
         if(activeGameDocSnapshot.exists){
           Map<String, dynamic>? documentData = activeGameDocSnapshot.data() as Map<String, dynamic>?;
@@ -574,7 +559,9 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                 documentData['player1Mistake'],
                 documentData['player2Mistake'],
                 documentData['playerId1'],
-                documentData['playerId2']
+                documentData['playerId2'],
+                isSkippedByPlayer1: documentData['isSkippedPlayer1'],
+                isSkippedByPlayer2: documentData['isSkippedPlayer2']
             );
             break;
           }
@@ -588,9 +575,10 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
         'player2Points': scoreTillNow,
         'player2Mistakes': numberOfMistakes,
         'isScoreUpdate2': true,
+        'isSkippedPlayer2': isSkippedByThisUser,
         'endedAt':Timestamp.now()
       });
-      while(true){
+      while(min5Passed){
         DocumentSnapshot activeGameDocSnapshot = await FirebaseFirestore.instance.collection(Constants.ACTIVE_GAME_POOL).doc(widget.activeGameId).get();
         if(activeGameDocSnapshot.exists){
           Map<String, dynamic>? documentData = activeGameDocSnapshot.data() as Map<String, dynamic>?;
@@ -601,14 +589,22 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                 documentData['player1Mistake'],
                 documentData['player2Mistake'],
                 documentData['playerId1'],
-                documentData['playerId2']
+                documentData['playerId2'],
+                isSkippedByPlayer1: documentData['isSkippedPlayer1'],
+                isSkippedByPlayer2: documentData['isSkippedPlayer2']
             );
             break;
           }
         }
       }
     }
-
+    // await Future.delayed(Duration(seconds: 5), () {print('deplayed3');});
+    // if(min5Passed == false){
+    //
+    //   setState(() {
+    //     winnerId = currentUserId;
+    //   });
+    // }
     print('thiswinner id $winnerId');
     await activeGameDocRef.update({
       'winnerId': winnerId,
@@ -637,7 +633,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
 
     }
 
-    deleteFromActiveGamePool();
+    // deleteFromActiveGamePool();
 
   }
 
@@ -662,7 +658,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
     //update isGameEnded to true;
     DocumentReference activeGameDocRef = FirebaseFirestore.instance.collection(Constants.ACTIVE_GAME_POOL).doc(widget.activeGameId);
     //winnerCalcuator(isSkippedByThisUser:true)
-    winnerCalculator(ctx, true, currentUserId);
+    winnerCalculator(ctx, true,currentUserId);
     setState(() {
       isGameEnded = true;
     });
@@ -673,8 +669,40 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
     fetchUserFromActiveGamePoolContinuously(widget.activeGameId, ctx);
   }
 
+  Widget winnerAnnouncement(String winnerId, String currentUserId){
+    String variableString =
+      winnerId == currentUserId
+          ? 'Congrats  you Won!, Play Again'
+          : 'Opps you Lose!, Try Again';
+
+    Widget whoIsWinner = Container(
+      padding: EdgeInsets.all(20),
+      child: Column(
+        children: [
+          Text(
+              'Game Ended!',
+              style: TextStyle(
+                fontSize: 20,
+                color: Theme.of(context).primaryColor
+              ),
+          ),
+          SizedBox(height: 5,),
+          Text(
+            variableString,
+            style: TextStyle(
+                fontSize: 20,
+                color: Theme.of(context).primaryColor
+            ),
+          )
+        ],
+      ),
+    );
+    return whoIsWinner;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeSwitchProvider>(context);
     if(widget.isMultiplayer && isGameEnded == false){
       fetchUserFromActiveGamePoolContinuously(widget.activeGameId, context);
       //return const Placeholder();
@@ -690,8 +718,26 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
         return false;
       },
       child: _isLoading
-          ? const Scaffold(
-              body: Center(child: CircularProgressIndicator(),),
+          ? Scaffold(
+              body: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Center(child: CircularProgressIndicator(
+                    color: Theme.of(context).primaryColor
+                  ),),
+                  SizedBox(height: 30,),
+                  ElevatedButton(
+                    onPressed: (){
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Go Back'),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor),
+                      fixedSize: MaterialStateProperty.all(Size.fromWidth(150)),
+                    ),
+                  )
+                ],
+              ),
             )
           : isGameEnded
             ? Scaffold(
@@ -701,10 +747,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                         Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                          Text('Game Ended'),
-                          Text(winnerId== currentUser!.uid
-                              ? 'Congrats  you Won!, Play Again'
-                              :'Opps you Lose!, Try Again'),
+                          winnerAnnouncement(winnerId, currentUser!.uid),
                           ElevatedButton(
                               onPressed: (){
                                 Navigator.of(context).pop();
@@ -729,30 +772,34 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                 children: [
                   Text(difficultyLevel!.name,
                     style: TextStyle(
-                        fontWeight: FontWeight.bold
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor
                     ),
                   ),
                   Text('Score: $scoreTillNow',
                     style: TextStyle(
-                        fontWeight: FontWeight.bold
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor
                     ),
                   ),
                   Text('Mistakes: $numberOfMistakes/3',
                     style: TextStyle(
-                        fontWeight: FontWeight.bold
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor
                     ),
                   ),
-                  widget.isMultiplayer
-                      ? TextButton.icon(
+                  TextButton.icon(
                     onPressed: (){},
                     label: Text(
                       _formatElapsedTime(elapsedTime),
                       style: TextStyle(
-                          fontWeight: FontWeight.bold
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor
                       ),
                     ),
-                    icon: Icon(Icons.timer, weight: 700,),
-                  ) : Text('removethis')
+                    icon: Icon(Icons.timer, weight: 700,
+                        color: Theme.of(context).primaryColor),
+                  )
                 ],
               ),
               //SizedBox(height: 8),
@@ -783,7 +830,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                         ? Colors.black
                         : Colors.blueGrey;
 
-                    final tappedColor = Colors.blueGrey.shade100; // Change this to the desired color
+                    final tappedColor = themeProvider.isDarkMode ? Colors.blueGrey.shade400 : Colors.blueGrey.shade100;  // Change this to the desired color
 
                     Color cellColor = isActiveCell ? Colors.blueGrey : Colors.grey.withOpacity(0.1);
                     cellColor = isNonActiveIsActive ? sudokuGridColors[row][col]: cellColor;
@@ -808,7 +855,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                         }
                         else {
                           resetNonActiveCell();
-                          setNonActiveCell(row, col, cellValue!);
+                          setNonActiveCell(row, col, cellValue!, themeProvider.isDarkMode);
                         }
                       },
                       child: Stack(
@@ -828,7 +875,9 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                             child: Center(
                               child: Text(
                                 cellValue != null ? cellValue.toString() : '',
-                                style: TextStyle(fontSize: 20),
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: themeProvider.isDarkMode ? Colors.white : Colors.blueGrey ,),
                               ),
                             ),
                           ),
@@ -867,8 +916,8 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                         fillCellWithNumber(number);
                       },
                       child: Container(
-                        width: 35,
-                        height: 35,
+                        width: 36,
+                        height: 36,
                         decoration: BoxDecoration(
                           color: Theme.of(context).primaryColor,
                           borderRadius: BorderRadius.circular(8.0),
@@ -876,7 +925,12 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                         child: Center(
                           child: Text(
                             number.toString(),
-                            style: TextStyle(color: Theme.of(context).secondaryHeaderColor, fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                // color: Theme.of(context).secondaryHeaderColor,
+                                color: Colors.white,
+                                fontSize: 20, fontWeight:
+                                FontWeight.bold
+                            ),
                           ),
                         ),
                       ),
@@ -892,7 +946,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                   child: Container(
                     color: Theme.of(context).primaryColor,
                     child: Center(
-                        child: Text('space for banner adds')
+                        child: Text('')
                     ),
                   ),
                 ),
