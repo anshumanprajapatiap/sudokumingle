@@ -39,7 +39,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
   // bool _isSeaching = true;
   // bool _isGameStarted = false;
   User? currentUser = FirebaseAuth.instance.currentUser;
-  Timer? searchTimer;
+  // Timer? searchTimer;
   // List<List<int>>? correctSudokuToPass;
   // List<List<int?>>? toBeSolvedSudokuToPass;
   // String _counter = '3';
@@ -633,11 +633,11 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
               if(data['playerSize']==2) {
                 if (data['createdBy'] == currentUser!.uid && data['isFirst']) {
                   initGameRoom(context, widget.roomId);
-                  return Center(child: Text('_isGameInalizing'));
+                  return searchingWidget();
                 }
                 else {
                   if (data['gameId'] == '') {
-                    return Center(child: Text('_Loading SudokuData'));
+                    return searchingWidget();
                   }
                   else {
                     if(data['createdBy']!=currentUser!.uid){
@@ -657,7 +657,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                           }
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             // Show loading indicator while waiting for data
-                            return CircularProgressIndicator();
+                            return searchingWidget();
                           }
 
                           if (snapshot.hasData && snapshot.data!.exists) {
@@ -666,7 +666,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                             // return Text('Accutal sodoku Widget data');
                             if(firebaseGamePoolProvider.getCorrectSudoku == []
                                 || firebaseGamePoolProvider.getToBeSolvedSudoku == []){
-                              return CircularProgressIndicator();
+                              return searchingWidget();
                             }
                             print('firebaseGamePoolProvider.getCorrectSudoku ${firebaseGamePoolProvider.getCorrectSudoku}');
                             print('firebaseGamePoolProvider.getToBeSolvedSudoku ${firebaseGamePoolProvider.getToBeSolvedSudoku}');
@@ -692,12 +692,12 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                       );
                     }
                     else {
-                      return UserSearchingWidget(milliSecondsDelayTime: 100, searching: true,);
+                      return searchingWidget();
                     }
                   }
                 }
               }
-              return UserSearchingWidget(milliSecondsDelayTime: 100, searching: true,);
+              return searchingWidget();
             }
 
             else {
@@ -820,6 +820,32 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
 
   }
 
-
+  Widget searchingWidget(){
+    return Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+        Text(
+          'Selected difficulty Level ${DifficultyEnumToString(widget.difficultyLevel).name}',
+          style: TextStyle(
+              color: Theme.of(context).primaryColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 20
+          ),
+        ),
+        const SizedBox(height: 20,),
+        UserSearchingWidget(milliSecondsDelayTime: 100, searching: true,),
+        const SizedBox(height: 20,),
+        Text(
+          'Searching Player',
+          style: TextStyle(
+              color: Theme.of(context).primaryColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 16
+          ),
+        ),
+      ],
+    );
+  }
 
 }

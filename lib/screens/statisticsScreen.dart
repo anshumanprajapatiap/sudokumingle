@@ -185,7 +185,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   backgroundColor: MaterialStateProperty.all(
                     isOnlineSelected
                         ? Theme.of(context).primaryColor
-                        : Colors.grey,
+                        : Theme.of(context).primaryColor.withAlpha(50),
                   ),
                   minimumSize: fixedTopButtonSize
 
@@ -196,6 +196,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     color: isOnlineSelected
                         ? Theme.of(context).secondaryHeaderColor
                         : Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold
                   ),
                 ),
               ),
@@ -210,7 +211,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   backgroundColor: MaterialStateProperty.all(
                     !isOnlineSelected
                         ? Theme.of(context).primaryColor
-                        : Colors.grey,
+                        : Theme.of(context).primaryColor.withAlpha(50),
                   ),
                   minimumSize: fixedTopButtonSize
                 ),
@@ -220,6 +221,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                     color: !isOnlineSelected
                         ? Theme.of(context).secondaryHeaderColor
                         : Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.bold
                   ),
                 ),
               ),
@@ -230,91 +232,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           Expanded(
             child: Row(
               children: [
-                // Sidebar with vertical text
-
-
-                // SingleChildScrollView(
-                //   child: Container(
-                //     height: MediaQuery.sizeOf(context).height*1,
-                //     width: MediaQuery.sizeOf(context).width*0.13,
-                //     color: Theme.of(context).secondaryHeaderColor, // Set sidebar background color
-                //     padding: const EdgeInsets.symmetric(vertical: 16),
-                //     child: Column(
-                //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                //       crossAxisAlignment: CrossAxisAlignment.end,
-                //       children: [
-                //
-                //         ElevatedButton(
-                //           onPressed: () {
-                //             setState(() {
-                //               isEasy = true;
-                //               isHard = false;
-                //               isMedium = false;
-                //               isMaster = false;
-                //               isGrandmaster = false;
-                //               isDoNotTry = false;
-                //             });
-                //           },
-                //           child: RotatedBox(
-                //             quarterTurns: -1,
-                //             child: Text(
-                //               'Easy',
-                //               style: TextStyle(
-                //                 color: !isEasy
-                //                     ? Theme.of(context).secondaryHeaderColor
-                //                     : Theme.of(context).primaryColor,
-                //               ),
-                //             ),
-                //           ),
-                //           style: ButtonStyle(
-                //             backgroundColor: MaterialStateProperty.all(
-                //               isEasy
-                //                   ? Theme.of(context).primaryColor
-                //                   : Colors.grey,
-                //             ),
-                //             minimumSize: fixedSideButtonSize,
-                //             // fixedSize: fixedSideButtonSize
-                //           ),
-                //         ),
-                //         ElevatedButton(
-                //           onPressed: () {
-                //             setState(() {
-                //               isEasy = false;
-                //               isMedium = true;
-                //               isHard = false;
-                //               isMaster = false;
-                //               isGrandmaster = false;
-                //               isDoNotTry = false;
-                //             });
-                //           },
-                //           child: RotatedBox(
-                //             quarterTurns: -1,
-                //             child: Text(
-                //               'Medium',
-                //               style: TextStyle(
-                //                 color: !isMedium
-                //                     ? Theme.of(context).secondaryHeaderColor
-                //                     : Theme.of(context).primaryColor,
-                //               ),
-                //             ),
-                //           ),
-                //           style: ButtonStyle(
-                //             backgroundColor: MaterialStateProperty.all(
-                //               isMedium
-                //                   ? Theme.of(context).primaryColor
-                //                   : Colors.grey,
-                //             ),
-                //             minimumSize: fixedSideButtonSize,
-                //             // fixedSize: fixedSideButtonSize
-                //           ),
-                //         ),
-                //
-                //
-                //       ],
-                //     ),
-                //   ),
-                // ),
-
                 SidebarButtonWidget(
                   difficultyLevels: ['Easy', 'Medium', 'Hard', 'Master', 'Grandmaster', 'Do Not Try'],
                   onPressed: (difficulty) {

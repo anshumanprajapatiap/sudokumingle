@@ -32,7 +32,7 @@ class SidebarButtonWidget extends StatelessWidget {
                 backgroundColor: MaterialStateProperty.all(
                   selectedDifficulty == difficulty
                       ? Theme.of(context).primaryColor
-                      : Colors.grey,
+                      : Theme.of(context).primaryColor.withAlpha(50),
                 ),
                 minimumSize: fixedSideButtonSize,
               ),
@@ -42,7 +42,7 @@ class SidebarButtonWidget extends StatelessWidget {
                   difficulty,
                   style: TextStyle(
                     color: selectedDifficulty != difficulty
-                        ? Theme.of(context).secondaryHeaderColor.withOpacity(0.7)
+                        ? Theme.of(context).primaryColor.withOpacity(0.7)
                         : Theme.of(context).secondaryHeaderColor,
                   ),
                 ),
