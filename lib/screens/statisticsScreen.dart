@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/firebaseUserDataProvider.dart';
 import '../widgets/sidebarButtonWidget.dart';
 import '../widgets/statisticsDetailsWidget.dart';
 
@@ -23,96 +25,101 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   // Simulated Firebase data
   Map<String, dynamic> gameDataMultiplayer = {
-    'Easy': {
-      'won': 10,
-      'bestTime': '00:01:30',
-      'worstTime': '00:03:45',
-      'totalGames': 20,
-      'winningPercentage': 80.0,
-    },
-    'Hard': {
-      'won': 20,
-      'bestTime': '00:01:30',
-      'worstTime': '00:03:45',
-      'totalGames': 20,
-      'winningPercentage': 80.0,
-    },
-    'Medium': {
-      'won': 30,
-      'bestTime': '00:01:30',
-      'worstTime': '00:03:45',
-      'totalGames': 30,
-      'winningPercentage': 80.0,
-    },
-    'Master': {
-      'won': 40,
-      'bestTime': '00:01:30',
-      'worstTime': '00:03:45',
-      'totalGames': 60,
-      'winningPercentage': 80.0,
-    },
-    'Grandmaster': {
-      'won': 50,
-      'bestTime': '00:01:30',
-      'worstTime': '00:03:45',
-      'totalGames': 200,
-      'winningPercentage': 80.0,
-    },
-    'Do Not Try': {
-      'won': 10,
-      'bestTime': '00:01:30',
-      'worstTime': '00:03:45',
-      'totalGames': 20,
-      'winningPercentage': 10.0,
-    },
-    // Add more data for other difficulty levels
   };
+  // Map<String, dynamic> gameDataMultiplayer = {
+  //   'Easy': {
+  //     'won': 10,
+  //     'bestTime': '00:01:30',
+  //     'worstTime': '00:03:45',
+  //     'totalGames': 20,
+  //     'winningPercentage': 80.0,
+  //   },
+  //   'Hard': {
+  //     'won': 20,
+  //     'bestTime': '00:01:30',
+  //     'worstTime': '00:03:45',
+  //     'totalGames': 20,
+  //     'winningPercentage': 80.0,
+  //   },
+  //   'Medium': {
+  //     'won': 30,
+  //     'bestTime': '00:01:30',
+  //     'worstTime': '00:03:45',
+  //     'totalGames': 30,
+  //     'winningPercentage': 80.0,
+  //   },
+  //   'Master': {
+  //     'won': 40,
+  //     'bestTime': '00:01:30',
+  //     'worstTime': '00:03:45',
+  //     'totalGames': 60,
+  //     'winningPercentage': 80.0,
+  //   },
+  //   'Grandmaster': {
+  //     'won': 50,
+  //     'bestTime': '00:01:30',
+  //     'worstTime': '00:03:45',
+  //     'totalGames': 200,
+  //     'winningPercentage': 80.0,
+  //   },
+  //   'Do Not Try': {
+  //     'won': 10,
+  //     'bestTime': '00:01:30',
+  //     'worstTime': '00:03:45',
+  //     'totalGames': 20,
+  //     'winningPercentage': 10.0,
+  //   },
+  //   // Add more data for other difficulty levels
+  // };
 
   Map<String, dynamic> gameDataSingleplayer = {
-    'Easy': {
-      'won': 10,
-      'bestTime': '00:01:30',
-      'worstTime': '00:03:45',
-      'totalGames': 20,
-      'winningPercentage': 80.0,
-    },
-    'Hard': {
-      'won': 20,
-      'bestTime': '00:01:30',
-      'worstTime': '00:03:45',
-      'totalGames': 20,
-      'winningPercentage': 80.0,
-    },
-    'Medium': {
-      'won': 30,
-      'bestTime': '00:01:30',
-      'worstTime': '00:03:45',
-      'totalGames': 30,
-      'winningPercentage': 80.0,
-    },
-    'Master': {
-      'won': 40,
-      'bestTime': '00:01:30',
-      'worstTime': '00:03:45',
-      'totalGames': 60,
-      'winningPercentage': 80.0,
-    },
-    'Grandmaster': {
-      'won': 50,
-      'bestTime': '00:01:30',
-      'worstTime': '00:03:45',
-      'totalGames': 200,
-      'winningPercentage': 80.0,
-    },
-    'Do Not Try': {
-      'won': 10,
-      'bestTime': '00:01:30',
-      'worstTime': '00:03:45',
-      'totalGames': 20,
-      'winningPercentage': 10.0,
-    },
-    // Add more data for other difficulty levels
   };
+
+  // Map<String, dynamic> gameDataSingleplayer = {
+  //   'Easy': {
+  //     'won': 10,
+  //     'bestTime': '00:01:30',
+  //     'worstTime': '00:03:45',
+  //     'totalGames': 20,
+  //     'winningPercentage': 80.0,
+  //   },
+  //   'Hard': {
+  //     'won': 20,
+  //     'bestTime': '00:01:30',
+  //     'worstTime': '00:03:45',
+  //     'totalGames': 20,
+  //     'winningPercentage': 80.0,
+  //   },
+  //   'Medium': {
+  //     'won': 30,
+  //     'bestTime': '00:01:30',
+  //     'worstTime': '00:03:45',
+  //     'totalGames': 30,
+  //     'winningPercentage': 80.0,
+  //   },
+  //   'Master': {
+  //     'won': 40,
+  //     'bestTime': '00:01:30',
+  //     'worstTime': '00:03:45',
+  //     'totalGames': 60,
+  //     'winningPercentage': 80.0,
+  //   },
+  //   'Grandmaster': {
+  //     'won': 50,
+  //     'bestTime': '00:01:30',
+  //     'worstTime': '00:03:45',
+  //     'totalGames': 200,
+  //     'winningPercentage': 80.0,
+  //   },
+  //   'Do Not Try': {
+  //     'won': 10,
+  //     'bestTime': '00:01:30',
+  //     'worstTime': '00:03:45',
+  //     'totalGames': 20,
+  //     'winningPercentage': 10.0,
+  //   },
+  //   // Add more data for other difficulty levels
+  // };
 
 
   Widget buildOnlineWidget(String difficulty) {
@@ -138,6 +145,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userDataProvider = Provider.of<FirebaseUserDataProvider>(context, listen: false);
+      setState(() {
+        gameDataMultiplayer = userDataProvider.getOnlineGameHistory;
+        gameDataSingleplayer = userDataProvider.getPracticeGameHistory;
+      });
+
+
     final fixedTopButtonSize = MaterialStateProperty.all(
         Size(MediaQuery.sizeOf(context).width* 0.5, 40));
     final fixedSideButtonSize = MaterialStateProperty.all(

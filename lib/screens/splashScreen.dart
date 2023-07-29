@@ -1,16 +1,45 @@
 
 import 'package:animated_splash_screen/animated_splash_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sudokumingle/providers/firebaseUserDataProvider.dart';
 import 'package:sudokumingle/screens/authScreen.dart';
 import '../main.dart';
 import 'bottomNavigationBar.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   final bool isLoggedIn;
   const SplashScreen({
     Key? key,
     required this.isLoggedIn
   }) : super(key: key);
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    Future.delayed(const Duration(microseconds: 5), () async {
+      final userDataProvider = Provider.of<FirebaseUserDataProvider>(context, listen: false);
+      final User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await userDataProvider.fetchCustomUserProfileData();
+        await userDataProvider.fetchUserGameHistory();
+      }
+      // Navigator.of(context).pushReplacement(MaterialPageRoute(
+      //   builder: (ctx) => const TabsScreen(),
+      // ));
+    });
+    super.initState();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +113,7 @@ class SplashScreen extends StatelessWidget {
       ),
     );
 
-    return isLoggedIn
+    return widget.isLoggedIn
         ? AnimatedSplashScreen(
           duration: 300,
           splash: content,

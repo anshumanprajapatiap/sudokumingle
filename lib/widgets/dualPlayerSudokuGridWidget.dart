@@ -20,14 +20,13 @@ class DualPlayerSudokuGridWidget extends StatefulWidget {
   final Map<String, dynamic> generatedSudoku;
   final bool isMultiplayer;
   final String activeGameId;
-  final String activePuzzleId;
+
   final bool isPlayer1;
 
   DualPlayerSudokuGridWidget({
     required this.generatedSudoku,
     required this.isMultiplayer,
     required this.activeGameId,
-    required this.activePuzzleId,
     required this.isPlayer1
   });
 
@@ -48,22 +47,6 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
   //   await audioCache?.load('assets/audio/alert_sound.mp3');
   // }
 
-  void playAlertSound() {
-    audioCache?.play('assets/audio/alert_sound.mp3');
-  }
-
-  int countEmptyCells() {
-    int emptyCellCount = 0;
-    for (int row = 0; row < 9; row++) {
-      for (int col = 0; col < 9; col++) {
-        if (sudokuGrid[row][col] == null) {
-          emptyCellCount++;
-        }
-      }
-    }
-    return emptyCellCount;
-  }
-
   List<List<Color>> sudokuGridColors = List.generate(9, (_) => List.filled(9, Colors.transparent));
   List<List<int?>> sudokuGrid = List.generate(9, (_) => List.filled(9, null));
   List<List<int>> sudokuGridCorrect = List.generate(9, (_) => List.filled(9, 0));
@@ -82,6 +65,23 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
   Duration elapsedTime = Duration.zero;
   String winnerId = '';
   int numberOfEmptyCell = 81;
+
+
+  void playAlertSound() {
+    audioCache?.play('assets/audio/alert_sound.mp3');
+  }
+
+  int countEmptyCells() {
+    int emptyCellCount = 0;
+    for (int row = 0; row < 9; row++) {
+      for (int col = 0; col < 9; col++) {
+        if (sudokuGrid[row][col] == null) {
+          emptyCellCount++;
+        }
+      }
+    }
+    return emptyCellCount;
+  }
 
   void setActiveCell(int row, int col) {
     resetNonActiveCell();
@@ -274,11 +274,12 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
           numberOfMistakes++;
         });
         if (numberOfMistakes >= 3) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => buildMaxMistakesDialog(),
-          );
+          // showDialog(
+          //   context: context,
+          //   barrierDismissible: false,
+          //   builder: (context) => buildMaxMistakesDialog(),
+          // );
+          thisPlayerLoseTheGame(currentUser!.uid, context);
         }
         return;
       }
@@ -380,7 +381,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
   }
 
   fetchUserFromActiveGamePoolContinuously(String gameId, BuildContext ctx) async{
-    print('fetching Game is Active $gameId for puzzle ${widget.activePuzzleId}');
+    // print('fetching Game is Active $gameId for puzzle ${widget.activePuzzleId}');
     CollectionReference activeUserPoolCollection = FirebaseFirestore.instance.collection('ActiveGamePool');
     if(isGameEnded) {
       //winnerCalculator(ctx, false, currentUser!.uid);
@@ -827,8 +828,8 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                     final rowNumberEight = row == 8;
                     final columnNumberEight = col == 8;
                     final borderColor = isBoldCellColumn || isBoldCellRow || rowNumberEight || columnNumberEight
-                        ? Colors.black
-                        : Colors.blueGrey;
+                        ? themeProvider.isDarkMode ? Colors.white : Colors.black
+                        : themeProvider.isDarkMode ? Colors.blueGrey.shade400 : Colors.blueGrey;
 
                     final tappedColor = themeProvider.isDarkMode ? Colors.blueGrey.shade400 : Colors.blueGrey.shade100;  // Change this to the desired color
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:sudokumingle/widgets/rectangularStatWidget.dart';
 
 class StatisticsDetailsWidget extends StatelessWidget {
   final String difficulty;
@@ -14,70 +15,102 @@ class StatisticsDetailsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          'Difficulty: $difficulty',
-          style: TextStyle(
-            fontSize: 20,
-            color: Theme.of(context).primaryColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 16),
-        Container(
-          height: MediaQuery.sizeOf(context).height*0.4,
-          width: MediaQuery.sizeOf(context).width*0.8,
-          color: Theme.of(context).primaryColor.withOpacity(0.5),
+    return difficultyData['totalGames'] ==  0
+        ? Center(
+            child: Text(
+                'No Data for $difficulty Level',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).primaryColor,
+                  fontWeight: FontWeight.bold,
+                ),
+            ),
+          )
+        : SingleChildScrollView(
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                //Game title start
+                const SizedBox(height: 10,),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child:Text(
+                    'Game',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                //Game Title end
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: RectangularStatWidget(iconToUse: Icons.grid_4x4_sharp, text: 'Difficulty', value: difficulty,),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: RectangularStatWidget(iconToUse:Icons.kayaking_sharp, text: 'Games Won', value: difficultyData['won'].toString(),),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: RectangularStatWidget(iconToUse:Icons.percent, text: 'Wining Rate', value:'${((difficultyData['won'] / difficultyData['totalGames']) * 100).toStringAsFixed(2)}',),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: RectangularStatWidget(iconToUse:Icons.star, text: 'Win with No Mistakes', value: difficultyData['won'].toString(),),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: RectangularStatWidget(iconToUse:Icons.padding, text: 'Total Game', value: difficultyData['totalGames'].toString(),),
+                ),
 
-        ),
-        SizedBox(height: 16),
-        Text(
-          'Games Won: ${difficultyData['won']}',
-          style: TextStyle(
-            fontSize: 16,
-            color: Theme.of(context).primaryColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          'Best Time: ${difficultyData['bestTime']}',
-          style: TextStyle(
-            fontSize: 16,
-            color: Theme.of(context).primaryColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          'Worst Time: ${difficultyData['worstTime']}',
-          style: TextStyle(
-            fontSize: 16,
-            color: Theme.of(context).primaryColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        if (isMultiplayer) ...[
-          // Additional data for multiplayer mode
-          Text(
-            'Winning Percentage: ${((difficultyData['won'] / difficultyData['totalGames']) * 100).toStringAsFixed(2)}%',
-            style: TextStyle(
-              fontSize: 16,
-              color: Theme.of(context).primaryColor,
-              fontWeight: FontWeight.bold,
+                //Time title start
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child:Text(
+                    'Time',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                //Time Title end
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: RectangularStatWidget(iconToUse: Icons.timer, text: 'Best Time', value: difficulty,),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: RectangularStatWidget(iconToUse:Icons.share_arrival_time_rounded, text: 'Worst Time', value: difficultyData['won'].toString(),),
+                ),
+
+                //Score title start
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child:Text(
+                    'Score',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                //Score Title end
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: RectangularStatWidget(iconToUse: Icons.score, text: 'Best Score', value: difficulty,),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: RectangularStatWidget(iconToUse:Icons.format_overline, text: 'Average Score', value: difficultyData['won'].toString(),),
+                ),
+              ],
             ),
-          ),
-          Text(
-            'Total Games Played: ${difficultyData['totalGames']}',
-            style: TextStyle(
-              fontSize: 16,
-              color: Theme.of(context).primaryColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ],
-    );
+        );
   }
 }

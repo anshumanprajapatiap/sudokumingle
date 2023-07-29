@@ -18,5 +18,6 @@ class Constants {
   static String ACTIVE_PUZZLE_POOL = 'ActivePuzzlePool';
   static String ACTIVE_GAME_POOL = 'ActiveGamePool';
   static String USER_GAME_HISTORY = 'userGameHistory';
-
+  static String USER_PRACTICE_HISTORY = 'UserPracticeHistory';
+  static String ACTIVE_ROOM = 'ActiveRoom';
 }

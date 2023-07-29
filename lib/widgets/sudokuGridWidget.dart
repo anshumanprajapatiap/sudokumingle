@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sudokumingle/model/gameHistoryModel.dart';
 import 'package:sudokumingle/providers/darkThemeProvider.dart';
 import 'package:sudokumingle/screens/homeScreen.dart';
 import 'package:sudokumingle/screens/praticeOfflineScreen.dart';
@@ -11,6 +12,7 @@ import 'package:sudokumingle/utils/SudokuBoardEnums.dart';
 import 'package:sudokumingle/utils/constants.dart';
 
 import '../main.dart';
+import '../providers/firebaseUserDataProvider.dart';
 import '../utils/globalMethodUtil.dart';
 
 class SudokuGridWidget extends StatefulWidget {
@@ -26,6 +28,7 @@ class SudokuGridWidget extends StatefulWidget {
 
 class _SudokuGridWidgetState extends State<SudokuGridWidget>
     with WidgetsBindingObserver {
+  Timestamp createdAt = Timestamp.now();
   Timer? searchTimer;
   bool _isLoading = true;
   AudioPlayer audioPlayer = AudioPlayer();
@@ -397,6 +400,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                       TextButton(
                         onPressed: () {
                           // Resume game
+                          saveGameToUserHistory();
                           Navigator.pop(context);
                           Navigator.pop(context);
                         },
@@ -408,6 +412,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                         ),
                         onPressed: () {
                           // Resume game
+                          saveGameToUserHistory();
                           Navigator.pop(context);
                           Navigator.pop(context);
                           Navigator.push(context,
@@ -516,6 +521,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                       TextButton(
                         onPressed: () {
                           // Resume game
+                          saveGameToUserHistory();
                           Navigator.pop(context);
                           Navigator.pop(context);
                         },
@@ -542,6 +548,32 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
         );
       },
     );
+  }
+
+  void saveGameToUserHistory(){
+    final userDataProvider = Provider.of<FirebaseUserDataProvider>(context, listen: false);
+    DateTime createdAtDateTime = createdAt.toDate();
+    // Duration duration;
+    // DateTime endedDateTime = createdAtDateTime.add(timer);
+    // Timestamp endedAt = Timestamp.fromDate(endedDateTime);
+
+    GameHistoryModel gameData = GameHistoryModel(
+        gameId: createdAt.toString(),
+        playerId1: '',
+        playerId2: '',
+        difficultyLevel: difficultyLevel!.name,
+        winnerId: '',
+        createdAt: createdAt,
+        endedAt: Timestamp.now(),
+        player1Points: scoreTillNow,
+        player2Points: 0,
+        player1Mistake: numberOfMistakes,
+        player2Mistake: 0
+    );
+
+    userDataProvider.addUserGameHistory(gameData, isMultiplayer: false);
+
+
   }
 
 
@@ -627,8 +659,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                       final rowNumberEight = row == 8;
                       final columnNumberEight = col == 8;
                       final borderColor = isBoldCellColumn || isBoldCellRow || rowNumberEight || columnNumberEight
-                          ? Colors.black
-                          : Colors.blueGrey;
+                          ? themeProvider.isDarkMode ? Colors.white : Colors.black
+                          : themeProvider.isDarkMode ? Colors.blueGrey.shade400 : Colors.blueGrey;
 
                       final tappedColor = themeProvider.isDarkMode ? Colors.blueGrey.shade400 : Colors.blueGrey.shade100; // Change this to the desired color
 

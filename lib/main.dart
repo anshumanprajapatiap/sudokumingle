@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sudokumingle/providers/darkThemeProvider.dart';
+import 'package:sudokumingle/providers/firebaseGamePoolProvider.dart';
+import 'package:sudokumingle/providers/firebaseRoomManagementProvider.dart';
+import 'package:sudokumingle/providers/firebaseUserDataProvider.dart';
 import 'package:sudokumingle/providers/googleSignInProvider.dart';
 import 'package:sudokumingle/providers/soundProvider.dart';
 import 'package:sudokumingle/screens/bottomNavigationBar.dart';
@@ -24,6 +27,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeSwitchProvider()),
         ChangeNotifierProvider(create: (_) => GoogleSignInProvider()),
         ChangeNotifierProvider(create: (_) => SoundProvider()),
+        ChangeNotifierProvider(create: (_) => FirebaseRoomManagementProvider()),
+        ChangeNotifierProvider(create: (_) => FirebaseUserDataProvider()),
+        ChangeNotifierProvider(create: (_) => FirebaseGamePoolProvider())
       ],
       child: MyApp(),
     )

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sudokumingle/providers/firebaseUserDataProvider.dart';
 import 'package:sudokumingle/screens/settingScreen.dart';
 
 import '../widgets/darkLightModeWidget.dart';
@@ -14,6 +16,123 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final lineHeight = 0.3;
+
+
+  void _showClearContentDialog(BuildContext context) {
+    final userDataProvider = Provider.of<FirebaseUserDataProvider>(context, listen: false);
+    bool clearOnlineData = false;
+    bool clearOfflineData = false;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState){
+            return Dialog(
+              insetAnimationCurve: Curves.bounceOut,
+              insetAnimationDuration: const Duration(milliseconds: 100),
+              backgroundColor: Theme.of(context).secondaryHeaderColor, // Set your desired background color here
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(30.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Clear Content',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+                    Column(
+                      // mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: clearOnlineData,
+                              onChanged: (value) {
+                                setState(() {
+                                  clearOnlineData = value!;
+                                });
+                              },
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(2.0),
+                              ),
+                            ),
+                            Text('Clear Online Data', style: TextStyle(color: Theme.of(context).primaryColor)),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: clearOfflineData,
+                              onChanged: (value) {
+                                setState(() {
+                                  clearOfflineData = value!;
+                                });
+                              },
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(2.0),
+                              ),
+                            ),
+                            Text('Clear Offline Data', style: TextStyle(color: Theme.of(context).primaryColor)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              // Perform the clear operation here
+                              if (clearOnlineData) {
+                                // Clear online data logic
+                                // ...
+                                userDataProvider.deleteOnlineGameHistoryData();
+                              }
+
+                              if (clearOfflineData) {
+                                // Clear offline data logic
+                                // ...
+                                userDataProvider.deleteOfflineGameHistoryData();
+                              }
+
+                              // Close the dialog
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('OK', style: TextStyle(color: Theme.of(context).primaryColor)),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              // Close the dialog
+                              Navigator.of(context).pop();
+                            },
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)
+                            ),
+                            child: Text('Cancel', style: TextStyle(color: Theme.of(context).secondaryHeaderColor),),
+                          ),
+                        ]
+                    ),
+                  ],
+                ),
+              ),
+
+            );
+          },
+        );
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Theme.of(context).primaryColor
         ),
         ),
-        actions: [
+        actions: const [
           DarkLightModeIconWidget(),
         ],
       ),
@@ -36,7 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             height: 200,
             color: Theme.of(context).primaryColor// Replace with your profile section content
           ),
-          SizedBox(height: 30,),
+          const SizedBox(height: 30,),
           Container(
             color: Theme.of(context).primaryColor.withOpacity(0.1),
             child: Column(
@@ -103,9 +222,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
-          SizedBox(height: 30,),
+          const SizedBox(height: 30,),
 
-          SizedBox(height: 30,),
+          const SizedBox(height: 30,),
+          Container(
+            color: Theme.of(context).primaryColor.withOpacity(0.1),
+            child: Column(
+              children: [
+                Container(height: lineHeight, color:Theme.of(context).primaryColor),
+                ListTile(
+
+                  title:  Text(
+                    'Clear Content',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  leading: Icon(
+                      Icons.lock_reset_outlined,
+                      size: 25,
+                      color: Theme.of(context).primaryColor
+                  ),
+                  trailing: Icon(
+                      Icons.arrow_right,
+                      size: 30,
+                      color: Theme.of(context).primaryColor
+                  ),
+                  onTap: () {
+                    // Clear Content
+                    _showClearContentDialog(context);
+                  },
+                ),
+                Container(height: lineHeight, color:Theme.of(context).primaryColor),
+              ],
+            ),
+          ),
+          const SizedBox(height: 30,),
+
+          const SizedBox(height: 30,),
           Container(
             color: Theme.of(context).primaryColor.withOpacity(0.1),
             child: Column(
@@ -135,7 +291,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
             ),
           ),
-          SizedBox(height: 30,),
+          const SizedBox(height: 30,),
 
           // LogoutWidget()
           // Add more ListTile widgets for additional items
