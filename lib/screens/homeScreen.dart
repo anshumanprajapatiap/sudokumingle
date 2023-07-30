@@ -289,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 }
                               });
                             },
-                            child: Text('Play Online'),
+                            child: Text('Play Online', style: TextStyle(color: Theme.of(context).secondaryHeaderColor),),
                             style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor),
                               fixedSize: MaterialStateProperty.all(Size.fromWidth(150)),
@@ -312,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 }
                               });
                             },
-                            child: Text('Practice Offline'),
+                            child: Text('Practice Offline', style: TextStyle(color: Theme.of(context).secondaryHeaderColor)),
                             style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor),
                               fixedSize: MaterialStateProperty.all(Size.fromWidth(150)),

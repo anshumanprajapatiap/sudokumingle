@@ -7,7 +7,9 @@ import 'package:provider/provider.dart';
 import 'package:sudokumingle/providers/firebaseGamePoolProvider.dart';
 import 'package:sudokumingle/utils/globalMethodUtil.dart';
 import 'package:sudokumingle/widgets/dualPlayerSudokuGridWidget.dart';
+import 'package:sudokumingle/widgets/gameSearchWidget.dart';
 import 'package:sudokumingle/widgets/sudokuGridWidget.dart';
+import 'package:sudokumingle/widgets/winnerAnnouncement.dart';
 import 'package:uuid/uuid.dart';
 
 import '../providers/firebaseRoomManagementProvider.dart';
@@ -538,9 +540,14 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
     // });
     final firebaseRoomManagementProvider = Provider.of<FirebaseRoomManagementProvider>(context, listen: false);
     final firebaseGamePoolProvider = Provider.of<FirebaseGamePoolProvider>(context, listen: false);
-    String createdBy = firebaseRoomManagementProvider.getRoomDetails['createdBy'];
-    String playerId1 = firebaseRoomManagementProvider.getRoomDetails['playerId1'];
-    String playerId2 = firebaseRoomManagementProvider.getRoomDetails['playerId2'];
+
+    DocumentSnapshot roomDataToGameDataDocSnap = await activeRoomInPoolCollection.doc(rId).get();
+    Map<String, dynamic> roomDataToGameData = roomDataToGameDataDocSnap.data() as Map<String, dynamic>;
+
+
+    String createdBy = roomDataToGameData['createdBy'];
+    String playerId1 = roomDataToGameData['playerId1'];
+    String playerId2 = roomDataToGameData['playerId2'];
     Timestamp createdAt = Timestamp.now();
 
     if(createdBy == currentUser!.uid){
@@ -633,11 +640,11 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
               if(data['playerSize']==2) {
                 if (data['createdBy'] == currentUser!.uid && data['isFirst']) {
                   initGameRoom(context, widget.roomId);
-                  return searchingWidget();
+                  return GameSearchWidget(difficultyLevel: widget.difficultyLevel);
                 }
                 else {
                   if (data['gameId'] == '') {
-                    return searchingWidget();
+                    return GameSearchWidget(difficultyLevel: widget.difficultyLevel);
                   }
                   else {
                     if(data['createdBy']!=currentUser!.uid){
@@ -657,19 +664,21 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                           }
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             // Show loading indicator while waiting for data
-                            return searchingWidget();
+                            return GameSearchWidget(difficultyLevel: widget.difficultyLevel);
                           }
 
                           if (snapshot.hasData && snapshot.data!.exists) {
                             // Data has been received, access it using snapshot.data
                             var gameData = snapshot.data!.data() as Map<String, dynamic>;
-                            // return Text('Accutal sodoku Widget data');
-                            if(firebaseGamePoolProvider.getCorrectSudoku == []
-                                || firebaseGamePoolProvider.getToBeSolvedSudoku == []){
-                              return searchingWidget();
+                            if(gameData['isGameEnded']){
+                              if(gameData['winnerId']==''){
+                                //calculate Winner
+                              }
+                              if(gameData['winnerId']!=''){
+                                return WinnerAnnouncement(winnerId: gameData['winnerId'], currentUserId: currentUser!.uid);
+                              }
+                              return const Text('Calculating Results');
                             }
-                            print('firebaseGamePoolProvider.getCorrectSudoku ${firebaseGamePoolProvider.getCorrectSudoku}');
-                            print('firebaseGamePoolProvider.getToBeSolvedSudoku ${firebaseGamePoolProvider.getToBeSolvedSudoku}');
                             return DualPlayerSudokuGridWidget(
                               generatedSudoku: {
                                 'correctSudoku': firebaseGamePoolProvider.getCorrectSudoku,
@@ -679,10 +688,9 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                               isMultiplayer: true,
                               activeGameId: gameData['gameId'] ?? '',
                               isPlayer1: gameData['playerId1']! == currentUser!.uid,
+                              playerId1: gameData['playerId1'],
+                              playerId2: gameData['playerId2'],
                             );
-
-                            // Update your UI with the new data
-                            return Text('sodokuWidget');
                           }
                           else {
                             // Document does not exist
@@ -692,12 +700,12 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                       );
                     }
                     else {
-                      return searchingWidget();
+                      return GameSearchWidget(difficultyLevel: widget.difficultyLevel);
                     }
                   }
                 }
               }
-              return searchingWidget();
+              return GameSearchWidget(difficultyLevel: widget.difficultyLevel);
             }
 
             else {
@@ -705,6 +713,16 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
               return Text('Document not found');
             }
           },
+        ),
+      ),
+
+      bottomNavigationBar: SizedBox(
+        height: MediaQuery.of(context).size.height*0.1,
+        child: Container(
+          color: Theme.of(context).primaryColor,
+          child: const Center(
+              child: Text('')
+          ),
         ),
       ),
     );
@@ -787,6 +805,9 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
 
 
   void deleteFromActiveGamePool() async{
+
+    //get Game ID and delete that First
+
     try {
       await FirebaseFirestore.instance
           .collection(Constants.ACTIVE_USER_POOL)
@@ -820,32 +841,32 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
 
   }
 
-  Widget searchingWidget(){
-    return Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-        Text(
-          'Selected difficulty Level ${DifficultyEnumToString(widget.difficultyLevel).name}',
-          style: TextStyle(
-              color: Theme.of(context).primaryColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 20
-          ),
-        ),
-        const SizedBox(height: 20,),
-        UserSearchingWidget(milliSecondsDelayTime: 100, searching: true,),
-        const SizedBox(height: 20,),
-        Text(
-          'Searching Player',
-          style: TextStyle(
-              color: Theme.of(context).primaryColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 16
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget searchingWidget(){
+  //   return Column(
+  //       mainAxisSize: MainAxisSize.min,
+  //       mainAxisAlignment: MainAxisAlignment.center,
+  //       children: [
+  //       Text(
+  //         'Selected difficulty Level ${DifficultyEnumToString(widget.difficultyLevel).name}',
+  //         style: TextStyle(
+  //             color: Theme.of(context).primaryColor,
+  //             fontWeight: FontWeight.bold,
+  //             fontSize: 20
+  //         ),
+  //       ),
+  //       const SizedBox(height: 20,),
+  //       UserSearchingWidget(milliSecondsDelayTime: 100, searching: true,),
+  //       const SizedBox(height: 20,),
+  //       Text(
+  //         'Searching Player',
+  //         style: TextStyle(
+  //             color: Theme.of(context).primaryColor,
+  //             fontWeight: FontWeight.bold,
+  //             fontSize: 16
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
 }

@@ -63,6 +63,7 @@ class GoogleSignInProvider extends ChangeNotifier {
           'email': _currentUser!.email,
           'mingleCoins': 1500,
           'rank': 0,
+          'userAvatar': 0,
           'isPro': false,
         };
 

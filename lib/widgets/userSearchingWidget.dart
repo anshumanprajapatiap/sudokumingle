@@ -9,8 +9,8 @@ import 'circularImageWidget.dart';
 class UserSearchingWidget extends StatefulWidget {
   final int milliSecondsDelayTime;
   final bool searching;
-  int userAvatarIndex;
-  UserSearchingWidget({super.key, required this.milliSecondsDelayTime, required this.searching, this.userAvatarIndex=0});
+  final int userAvatarIndex;
+  UserSearchingWidget({super.key, required this.milliSecondsDelayTime, required this.searching, required this.userAvatarIndex});
 
   @override
   State<UserSearchingWidget> createState() => _UserSearchingWidgetState();
@@ -37,9 +37,8 @@ class _UserSearchingWidgetState extends State<UserSearchingWidget> {
   @override
   void initState() {
     super.initState();
-    int currentRandom = Random().nextInt(Constants.avatarList.length);
     setState(() {
-      currentUrl = Constants.avatarList[currentRandom];
+      currentUrl = Constants.avatarList[widget.userAvatarIndex];
     });
     if(widget.searching){
       loadAvatarsWithDelay();

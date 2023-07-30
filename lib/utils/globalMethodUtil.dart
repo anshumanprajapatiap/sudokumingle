@@ -2,6 +2,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import 'constants.dart';
+
 class GlobalMethodUtil{
 
   static Future<void> warningDialog({
@@ -78,4 +80,88 @@ class FirebaseGlobalMethodUtil{
     });
   }
 
+}
+
+
+class FirebaseGlobalMethodActiveGamePoolUtil{
+
+  void thisPlayerWonTheGame(String playerId1, String playerId2, bool isPlayer1, int scoreToUpdate, int mistakesToUpdate, String gameId) async {
+
+    DocumentReference activeGameDocRef = FirebaseFirestore.instance.collection(Constants.ACTIVE_GAME_POOL).doc(gameId);
+
+    if(isPlayer1){
+      await activeGameDocRef.update({
+        'isGameEnded': true,
+        'isSkippedPlayer1': true,
+        'player1Points': scoreToUpdate,
+        'player1Mistake': mistakesToUpdate,
+        'winnerId': playerId1
+      });
+    }
+    else{
+      await activeGameDocRef.update({
+        'isGameEnded': true,
+        'isSkippedPlayer2': true,
+        'player2Points': scoreToUpdate,
+        'player2Mistake': mistakesToUpdate,
+        'winnerId': playerId2
+      });
+
+    }
+    // await Future.delayed(Duration(seconds: 3), () {print('deplayed1');});
+    // fetchUserFromActiveGamePoolContinuously(widget.activeGameId, ctx);
+  }
+
+  void thisPlayerLoseTheGame(String playerId1, String playerId2, bool isPlayer1, int scoreToUpdate, int mistakesToUpdate, String gameId) async{
+    DocumentReference activeGameDocRef = FirebaseFirestore.instance.collection(Constants.ACTIVE_GAME_POOL).doc(gameId);
+    if(isPlayer1){
+      await activeGameDocRef.update({
+        'isGameEnded': true,
+        'isSkippedPlayer1': true,
+        'player1Points': scoreToUpdate,
+        'player1Mistake': mistakesToUpdate,
+        'winnerId': playerId2
+      });
+    }
+    else{
+      await activeGameDocRef.update({
+        'isGameEnded': true,
+        'isSkippedPlayer2': true,
+        'player2Points': scoreToUpdate,
+        'player2Mistake': mistakesToUpdate,
+        'winnerId': playerId1
+      });
+
+    }
+  }
+
+  void updateScore(bool isPlayer1, int scoreToUpdate, String gameId) async {
+    DocumentReference activeGameDocRef = FirebaseFirestore.instance.collection(Constants.ACTIVE_GAME_POOL).doc(gameId);
+    if(isPlayer1){
+      await activeGameDocRef.update({
+        'player1Points': scoreToUpdate,
+      });
+    }
+    else{
+      await activeGameDocRef.update({
+        'player2Points': scoreToUpdate,
+      });
+
+    }
+  }
+
+  void updateMistake(bool isPlayer1, int mistakesToUpdate, String gameId) async {
+    DocumentReference activeGameDocRef = FirebaseFirestore.instance.collection(Constants.ACTIVE_GAME_POOL).doc(gameId);
+    if(isPlayer1){
+      await activeGameDocRef.update({
+        'player1Mistake': mistakesToUpdate,
+      });
+    }
+    else{
+      await activeGameDocRef.update({
+        'player2Mistake': mistakesToUpdate,
+      });
+
+    }
+  }
 }

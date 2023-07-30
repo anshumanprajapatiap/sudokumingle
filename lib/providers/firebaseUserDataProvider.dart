@@ -128,7 +128,8 @@ class FirebaseUserDataProvider with ChangeNotifier {
       _userData = {
         'userFirstName': _currentAuthUser.displayName,
         'coins': userData['mingleCoins'],
-        'userRank': userData['rank']
+        'userRank': userData['rank'],
+        'userAvatar': userData['userAvatar']
       };
     }
     setCustomUserProfileDataRank();
