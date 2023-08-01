@@ -95,7 +95,8 @@ class FirebaseGlobalMethodActiveGamePoolUtil{
         'isSkippedPlayer1': true,
         'player1Points': scoreToUpdate,
         'player1Mistake': mistakesToUpdate,
-        'winnerId': playerId1
+        'winnerId': playerId1,
+        'endedAt': Timestamp.now()
       });
     }
     else{
@@ -104,7 +105,8 @@ class FirebaseGlobalMethodActiveGamePoolUtil{
         'isSkippedPlayer2': true,
         'player2Points': scoreToUpdate,
         'player2Mistake': mistakesToUpdate,
-        'winnerId': playerId2
+        'winnerId': playerId2,
+        'endedAt': Timestamp.now()
       });
 
     }
@@ -120,7 +122,8 @@ class FirebaseGlobalMethodActiveGamePoolUtil{
         'isSkippedPlayer1': true,
         'player1Points': scoreToUpdate,
         'player1Mistake': mistakesToUpdate,
-        'winnerId': playerId2
+        'winnerId': playerId2,
+        'endedAt': Timestamp.now()
       });
     }
     else{
@@ -129,7 +132,8 @@ class FirebaseGlobalMethodActiveGamePoolUtil{
         'isSkippedPlayer2': true,
         'player2Points': scoreToUpdate,
         'player2Mistake': mistakesToUpdate,
-        'winnerId': playerId1
+        'winnerId': playerId1,
+        'endedAt': Timestamp.now()
       });
 
     }

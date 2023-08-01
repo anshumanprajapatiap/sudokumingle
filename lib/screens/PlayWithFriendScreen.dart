@@ -13,6 +13,8 @@ import 'package:sudokumingle/widgets/winnerAnnouncement.dart';
 import 'package:uuid/uuid.dart';
 
 import '../providers/firebaseRoomManagementProvider.dart';
+import '../providers/firebaseUserDataProvider.dart';
+import '../providers/firebaseUserDataProvider.dart';
 import '../utils/SudokuBoardEnums.dart';
 import '../utils/constants.dart';
 import '../utils/sudokuGeneratorNewAlgorithm.dart';
@@ -611,6 +613,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
   Widget build(BuildContext context) {
 
     final firebaseGamePoolProvider = Provider.of<FirebaseGamePoolProvider>(context, listen: false);
+    final firebaseUserDataProvider = Provider.of<FirebaseUserDataProvider>(context, listen: false);
 
     return Scaffold(
         appBar: AppBar(
@@ -675,6 +678,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                                 //calculate Winner
                               }
                               if(gameData['winnerId']!=''){
+                                firebaseUserDataProvider.addOnlineGameDataToGameHistory(data['gameId']);
                                 return WinnerAnnouncement(winnerId: gameData['winnerId'], currentUserId: currentUser!.uid);
                               }
                               return const Text('Calculating Results');

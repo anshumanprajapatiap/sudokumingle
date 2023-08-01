@@ -14,7 +14,7 @@ class StatisticsScreen extends StatefulWidget {
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
   bool _isLoading = false;
-  bool isOnlineSelected = true; // Initially, "Online" is selected
+  bool isOnlineSelected = false; // Initially, "Online" is selected
   // bool isEasy = true;
   // bool isMedium = false;
   // bool isHard= false;

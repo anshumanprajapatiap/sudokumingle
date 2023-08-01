@@ -12,6 +12,7 @@ class GameHistoryModel{
   final int player2Points;
   final int player1Mistake;
   final int player2Mistake;
+  final String createdBy;
 
   GameHistoryModel({
     required this.gameId,
@@ -24,5 +25,7 @@ class GameHistoryModel{
     required this.player1Points,
     required this.player2Points,
     required this.player1Mistake,
-    required this.player2Mistake});
+    required this.player2Mistake,
+    required this.createdBy
+  });
 }

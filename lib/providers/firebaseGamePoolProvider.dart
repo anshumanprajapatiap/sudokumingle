@@ -112,6 +112,7 @@ class FirebaseGamePoolProvider with ChangeNotifier {
       String createdBy, Map<String, dynamic> puzzleData) async {
     correctSudokuToPass = [];
     toBeSolvedSudokuToPass = [];
+    _gameData = {};
     try {
       CollectionReference activePuzzleGameCollection = FirebaseFirestore
           .instance.collection(Constants.ACTIVE_GAME_POOL);
@@ -119,6 +120,9 @@ class FirebaseGamePoolProvider with ChangeNotifier {
 
       correctSudokuToPass = puzzleData['correctSudoku'];
       toBeSolvedSudokuToPass = puzzleData['toBeSolvedSudoku'];
+      _gameData = {
+        'gameId': gameId
+      };
       notifyListeners();
 
       // Set the data for the user document
@@ -159,6 +163,7 @@ class FirebaseGamePoolProvider with ChangeNotifier {
   fetchPuzzleForGame(String gameId) async {
     correctSudokuToPass = [];
     toBeSolvedSudokuToPass = [];
+    _gameData = {};
     print('fetingpuzzleDataForGameFucntion ${gameId}');
     CollectionReference activePuzzlePoolCollection = FirebaseFirestore.instance
         .collection(Constants.ACTIVE_GAME_POOL);
@@ -186,8 +191,23 @@ class FirebaseGamePoolProvider with ChangeNotifier {
 
       correctSudokuToPass = correctSudoku;
       toBeSolvedSudokuToPass = toBeSolvedSudoku;
+      _gameData = {
+        'gameId': documentData['documentData']
+      };
       notifyListeners();
     }
+  }
+
+
+  deleteGameFromGamePool(String gameId) async{
+    await FirebaseFirestore.instance
+        .collection(Constants.ACTIVE_GAME_POOL)
+        .doc(gameId)
+        .delete().then((value) {
+          _gameData.clear();
+          notifyListeners();
+          return ;
+    });
   }
 
 }

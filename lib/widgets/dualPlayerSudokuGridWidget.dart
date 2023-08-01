@@ -40,10 +40,10 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
   AudioPlayer audioPlayer = AudioPlayer();
   AudioCache? audioCache;
   bool isGameEnded = false;
-  // void initAudioCache() async {
-  //   audioCache = AudioCache(fixedPlayer: audioPlayer);
-  //   await audioCache?.load('assets/audio/alert_sound.mp3');
-  // }
+  void initAudioCache() async {
+    audioCache = AudioCache(fixedPlayer: audioPlayer);
+    await audioCache?.load('audio/alert_sound.mp3');
+  }
 
   List<List<Color>> sudokuGridColors = List.generate(9, (_) => List.filled(9, Colors.transparent));
   List<List<int?>> sudokuGrid = List.generate(9, (_) => List.filled(9, null));
@@ -69,7 +69,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
 
 
   void playAlertSound() {
-    audioCache?.play('assets/audio/alert_sound.mp3');
+    audioCache?.play('audio/alert_sound.mp3');
   }
 
   int countEmptyCells() {
@@ -288,7 +288,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
   @override
   void initState() {
     super.initState();
-    // initAudioCache();
+    initAudioCache();
     initializeSudoku();
     counterStartStop();
     // startTimer();

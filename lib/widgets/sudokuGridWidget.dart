@@ -33,14 +33,18 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   bool _isLoading = true;
   AudioPlayer audioPlayer = AudioPlayer();
   AudioCache? audioCache;
-  // void initAudioCache() async {
-  //   audioCache = AudioCache(fixedPlayer: audioPlayer);
-  //   await audioCache?.load('assets/audio/alert_sound.mp3');
-  // }
+  void initAudioCache() async {
+    audioCache = AudioCache(fixedPlayer: audioPlayer);
+    await audioCache?.load('audio/alert_sound.mp3');
+  }
 
   void playAlertSound() {
-    audioCache?.play('assets/audio/alert_sound.mp3');
+    audioCache?.play('audio/alert_sound.mp3');
   }
+  // void playAlertSound(){
+  //   final player=AudioCache();
+  //   player.play('audio/alert_sound.mp3');
+  // }
 
   int countEmptyCells() {
     int emptyCellCount = 0;
@@ -135,7 +139,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   @override
   void initState() {
     super.initState();
-    // initAudioCache();
+    initAudioCache();
     startTimer();
     initializeSudoku();
     timer = Timer.periodic(Duration(seconds: 1), (_) {
@@ -568,7 +572,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
         player1Points: scoreTillNow,
         player2Points: 0,
         player1Mistake: numberOfMistakes,
-        player2Mistake: 0
+        player2Mistake: 0,
+        createdBy: ''
     );
 
     userDataProvider.addUserGameHistory(gameData, isMultiplayer: false);

@@ -188,7 +188,7 @@ class FirebaseUserDataProvider with ChangeNotifier {
 
         onlineGameData.docs.forEach((element) {
           Map<String, dynamic> gameData = {
-            'difficultyLevel': element.get('puzzleId'),
+            'difficultyLevel': element.get('difficulty'),
             'createdAt': element.get('createdAt'),
             'endedAt': element.get('endedAt'),
             'isWinner': element.get('winnerId') == _currentAuthUser!.uid ? true : false
@@ -200,6 +200,8 @@ class FirebaseUserDataProvider with ChangeNotifier {
         });
     });
 
+    print(onlineGameHistory);
+
     await FirebaseFirestore.instance
         .collection(Constants.CUSTOM_USER_PROFILE)
         .doc(_currentAuthUser!.uid)
@@ -208,7 +210,7 @@ class FirebaseUserDataProvider with ChangeNotifier {
 
       offlineGameData.docs.forEach((element) {
         Map<String, dynamic> gameData = {
-          'difficultyLevel': element.get('difficultyLevel'),
+          'difficultyLevel': element.get('difficulty'),
           'createdAt': element.get('createdAt'),
           'endedAt': element.get('endedAt'),
         };
@@ -219,6 +221,7 @@ class FirebaseUserDataProvider with ChangeNotifier {
         );
       });
     });
+    print(onlineGameHistory);
 
     calculateStatistics(onlineGameHistory, practiceGameHistory);
 
@@ -295,14 +298,15 @@ class FirebaseUserDataProvider with ChangeNotifier {
       'gameId': gameData.gameId,
       'playerId1': isMultiplayer ? gameData.playerId1 : _currentAuthUser.uid,
       'playerId2': gameData.playerId2,
-      'difficultyLevel': gameData.difficultyLevel,
+      'difficulty': gameData.difficultyLevel,
       'winnerId': gameData.winnerId,
       'createdAt': gameData.createdAt,
       'endedAt': gameData.endedAt,
       'player1Points': gameData.player1Points,
       'player2Points': gameData.player2Points,
       'player1Mistake': gameData.player1Mistake,
-      'player2Mistake': gameData.player2Mistake
+      'player2Mistake': gameData.player2Mistake,
+      'createdBy': gameData.createdBy
     };
 
     if(isMultiplayer){
@@ -318,6 +322,7 @@ class FirebaseUserDataProvider with ChangeNotifier {
       await userGameDocument.set(gameDataToAdd);
       //add to local list as well
     }
+
     updateGameDataMultiplayer(gameData.difficultyLevel, isMultiplayer, gameDataToAdd);
     setCustomUserProfileDataCoin(100);
     setCustomUserProfileDataRank();
@@ -342,6 +347,34 @@ class FirebaseUserDataProvider with ChangeNotifier {
 
     }
     notifyListeners();
+
+  }
+
+  void addOnlineGameDataToGameHistory(String gameId) async{
+     DocumentSnapshot gameDataSnapshot = await FirebaseFirestore.instance.collection(Constants.ACTIVE_GAME_POOL).doc(gameId).get();
+
+    if(gameDataSnapshot.exists){
+      Map<String, dynamic> gameData = gameDataSnapshot.data() as Map<String, dynamic>;
+
+      GameHistoryModel gameDataObj = GameHistoryModel(
+          gameId: gameData['gameId'],
+          playerId1: gameData['playerId1'],
+          playerId2: gameData['playerId2'],
+          difficultyLevel: gameData['difficulty'],
+          winnerId: gameData['winnerId'],
+          createdAt: gameData['createdAt'],
+          endedAt: gameData['endedAt'],
+          player1Points: gameData['player1Points'],
+          player2Points: gameData['player2Points'],
+          player1Mistake: gameData['player1Mistake'],
+          player2Mistake: gameData['player1Mistake'],
+          createdBy: gameData['createdBy']
+      );
+      print('data to added on OnlineGame History');
+
+      addUserGameHistory(gameDataObj, isMultiplayer: true,);
+
+    }
 
   }
 
