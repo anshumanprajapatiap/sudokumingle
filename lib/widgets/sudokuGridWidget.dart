@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sudokumingle/model/gameHistoryModel.dart';
@@ -28,9 +29,10 @@ class SudokuGridWidget extends StatefulWidget {
 
 class _SudokuGridWidgetState extends State<SudokuGridWidget>
     with WidgetsBindingObserver {
+  User? currentUser = FirebaseAuth.instance.currentUser;
   Timestamp createdAt = Timestamp.now();
   Timer? searchTimer;
-  bool _isLoading = true;
+  // bool _isLoading = true;
   AudioPlayer audioPlayer = AudioPlayer();
   AudioCache? audioCache;
   void initAudioCache() async {
@@ -72,6 +74,9 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   int numberOfMistakes = 0;
   int scoreTillNow = 0;
   int numberOfEmptyCell = 81;
+
+  bool isCounter = true;
+  String counter = "3";
 
   late Timer timer;
   Duration elapsedTime = Duration.zero;
@@ -136,21 +141,50 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     return sudokuGrid[row][col] == null;
   }
 
+
+  void counterStartStop() async{
+
+    await Future.delayed(Duration(seconds: 1), () {print('deplayed for 3');});
+    setState(() {
+      counter = "2";
+    });
+    await Future.delayed(Duration(seconds: 1), () {print('deplayed for 2');});
+    setState(() {
+      counter = "1";
+    });
+    await Future.delayed(Duration(seconds: 1), () {print('deplayed for 1');});
+    setState(() {
+      counter = "GO!";
+    });
+    await Future.delayed(Duration(seconds: 1), () {print('deplayed for GO');});
+    setState(() {
+      isCounter = false;
+    });
+
+    startTimer();
+    timer = Timer.periodic(Duration(seconds: 1), (_) {
+      setState(() {
+        elapsedTime = stopwatch.elapsed;
+      });
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     initAudioCache();
     startTimer();
     initializeSudoku();
-    timer = Timer.periodic(Duration(seconds: 1), (_) {
-      setState(() {
-        elapsedTime = stopwatch.elapsed;
-      });
-    });
+    counterStartStop();
+    // timer = Timer.periodic(Duration(seconds: 1), (_) {
+    //   setState(() {
+    //     elapsedTime = stopwatch.elapsed;
+    //   });
+    // });
     WidgetsBinding.instance?.addObserver(this);
-    setState(() {
-      _isLoading = false;
-    });
+    // setState(() {
+    //   _isLoading = false;
+    // });
   }
 
   @override
@@ -528,6 +562,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                           saveGameToUserHistory();
                           Navigator.pop(context);
                           Navigator.pop(context);
+                          // Navigator.pop(context);
                         },
                         child: Text('Exit'),
                       ),
@@ -556,24 +591,26 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
 
   void saveGameToUserHistory(){
     final userDataProvider = Provider.of<FirebaseUserDataProvider>(context, listen: false);
-    DateTime createdAtDateTime = createdAt.toDate();
     // Duration duration;
     // DateTime endedDateTime = createdAtDateTime.add(timer);
     // Timestamp endedAt = Timestamp.fromDate(endedDateTime);
-
+    bool _isGameCompleted = false;
+    if(numberOfMistakes != 3 && numberOfEmptyCell==0){
+      _isGameCompleted = true;
+    }
     GameHistoryModel gameData = GameHistoryModel(
         gameId: createdAt.toString(),
-        playerId1: '',
+        playerId1: currentUser!.uid,
         playerId2: '',
         difficultyLevel: difficultyLevel!.name,
-        winnerId: '',
+        winnerId: _isGameCompleted ? currentUser!.uid : '',
         createdAt: createdAt,
         endedAt: Timestamp.now(),
         player1Points: scoreTillNow,
         player2Points: 0,
         player1Mistake: numberOfMistakes,
         player2Mistake: 0,
-        createdBy: ''
+        createdBy: currentUser!.uid,
     );
 
     userDataProvider.addUserGameHistory(gameData, isMultiplayer: false);
@@ -593,9 +630,18 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
         pauseTimer();
         return true;
       },
-      child: _isLoading
-          ? const Scaffold(
-            body:  Center(child: CircularProgressIndicator(),),
+      child: isCounter
+          ? Scaffold(
+            body: Center(
+              child: Text(
+                counter,
+                style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize:  30
+                ),
+              ),
+            ),
           )
           : Scaffold(
             body: Column(
@@ -740,6 +786,96 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                 ),
 
                 Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      //Reset
+                      /*
+                      TextButton(
+                        onPressed: () {
+                          // Handle reset button tap here
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          padding: const EdgeInsets.all(8), //// Remove default padding
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.restore, color: Theme.of(context).primaryColor,),
+                            SizedBox(height: 4),
+                            Text('Reset', style: TextStyle(color: Theme.of(context).primaryColor, )),
+                          ],
+                        ),
+                      ),
+                      */
+
+                      //Erase
+                      /*
+                      TextButton(
+                        onPressed: () {
+                          // Handle erase button tap here
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.all(8), //// Remove default padding
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.backspace, color: Theme.of(context).primaryColor),
+                            SizedBox(height: 4),
+                            Text('Erase', style: TextStyle(color: Theme.of(context).primaryColor, )),
+                          ],
+                        ),
+                      ),*/
+
+                      //Notes
+                      /*
+                      TextButton(
+                        onPressed: () {
+                          // Handle notes button tap here
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.all(8), //// Remove default padding
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.note, color: Theme.of(context).primaryColor),
+                            SizedBox(height: 4),
+                            Text('Notes', style: TextStyle(color: Theme.of(context).primaryColor, )),
+                          ],
+                        ),
+                      ),
+                      */
+
+
+                      //Hint
+                      /*
+                      TextButton(
+                        onPressed: () {
+                          // Handle hint button tap here
+                        },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.all(8), // Remove default padding
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.lightbulb, color: Theme.of(context).primaryColor),
+                            const SizedBox(height: 4),
+                            Text('Hint', style: TextStyle(color: Theme.of(context).primaryColor, )),
+                          ],
+                        ),
+                      ),
+                      */
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20),
+
+                Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -770,9 +906,11 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                     }),
                   ),
                 ),
+                SizedBox(height: 20),
 
               ],
             ),
+
             bottomNavigationBar: SizedBox(
               height: MediaQuery.of(context).size.height*0.1,
               child: Container(

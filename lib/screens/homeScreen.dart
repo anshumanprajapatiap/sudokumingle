@@ -204,10 +204,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             : Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Text(
-                              'Hi, ${firebaseUserDataProvider.getUserData['userFirstName']}',
+                            firebaseUserDataProvider.getUserData['userFirstName']!=null
+                            ? Text(
+                              'Hi, ${firebaseUserDataProvider.getUserData['userFirstName']?? ''}',
+                                style: topHeading,
+                              )
+                            : Text(
+                              '',
                               style: topHeading,
                             ),
+
                             firebaseUserDataProvider.getUserData['userRank']!=null
                                 ? firebaseUserDataProvider.getUserData['userRank'] > 999999
                                   ? Text(

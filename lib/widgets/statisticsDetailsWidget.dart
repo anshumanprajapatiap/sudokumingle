@@ -13,6 +13,13 @@ class StatisticsDetailsWidget extends StatelessWidget {
     required this.isMultiplayer,
   });
 
+  String formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
+  }
+
   @override
   Widget build(BuildContext context) {
     return difficultyData['totalGames'] ==  0
@@ -59,7 +66,7 @@ class StatisticsDetailsWidget extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
-                  child: RectangularStatWidget(iconToUse:Icons.star, text: 'Win with No Mistakes', value: difficultyData['won'].toString(),),
+                  child: RectangularStatWidget(iconToUse:Icons.star, text: 'Win with No Mistakes', value: difficultyData['wonWithoutMistake'].toString(),),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
@@ -81,11 +88,11 @@ class StatisticsDetailsWidget extends StatelessWidget {
                 //Time Title end
                 Padding(
                   padding: const EdgeInsets.all(10.0),
-                  child: RectangularStatWidget(iconToUse: Icons.timer, text: 'Best Time', value: difficulty,),
+                  child: RectangularStatWidget(iconToUse: Icons.timer, text: 'Best Time', value: '${formatDuration(difficultyData['bestTime']).toString()}',),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
-                  child: RectangularStatWidget(iconToUse:Icons.share_arrival_time_rounded, text: 'Worst Time', value: difficultyData['won'].toString(),),
+                  child: RectangularStatWidget(iconToUse:Icons.share_arrival_time_rounded, text: 'Worst Time', value: formatDuration(difficultyData['worstTime']).toString(),),
                 ),
 
                 //Score title start
@@ -103,11 +110,11 @@ class StatisticsDetailsWidget extends StatelessWidget {
                 //Score Title end
                 Padding(
                   padding: const EdgeInsets.all(10.0),
-                  child: RectangularStatWidget(iconToUse: Icons.score, text: 'Best Score', value: difficulty,),
+                  child: RectangularStatWidget(iconToUse: Icons.score, text: 'Best Score', value: difficultyData['bestScore'].toString(),),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
-                  child: RectangularStatWidget(iconToUse:Icons.format_overline, text: 'Average Score', value: difficultyData['won'].toString(),),
+                  child: RectangularStatWidget(iconToUse:Icons.format_overline, text: 'Average Score', value: (difficultyData['avgScore']/difficultyData['totalGames']).toStringAsFixed(2),),
                 ),
               ],
             ),
