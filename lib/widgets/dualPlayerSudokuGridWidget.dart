@@ -417,6 +417,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                               }
                             }
                             else {
+                              resetActiveCell();
                               resetNonActiveCell();
                               setNonActiveCell(row, col, cellValue!, themeProvider.isDarkMode);
                             }

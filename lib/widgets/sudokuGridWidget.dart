@@ -594,8 +594,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
         return true;
       },
       child: _isLoading
-          ? Scaffold(
-            body: Center(child: CircularProgressIndicator(),),
+          ? const Scaffold(
+            body:  Center(child: CircularProgressIndicator(),),
           )
           : Scaffold(
             body: Column(
@@ -691,6 +691,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                             }
                           }
                           else {
+                              resetActiveCell();
                               resetNonActiveCell();
                               setNonActiveCell(row, col, cellValue!, themeProvider.isDarkMode);
                           }
