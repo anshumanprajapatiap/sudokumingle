@@ -29,55 +29,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
         color: Theme.of(context).primaryColor.withOpacity(0.1),
         child: Column(
           children: [
-            Container(height: lineHeight, color: Theme.of(context).primaryColor),
-            // Notification Setting
-            SwitchListTile(
-              title: Text(
-                'Notifications',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-              value: notificationEnabled,
-              onChanged: (value) {
-                setState(() {
-                  notificationEnabled = value;
-                });
-              },
-              activeColor: Theme.of(context).primaryColor,
-              secondary: Icon(
-                Icons.notifications,
-                size: 25,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            Container(height: lineHeight, color: Theme.of(context).primaryColor),
-
-            // Sound Setting
-            SwitchListTile(
-              title: Text(
-                'Sound',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-              value: soundProvider.isSoundOn,
-              onChanged: (value) {
-                soundProvider.toggleSound();
-                soundProvider.getSound();
-              },
-              activeColor: Theme.of(context).primaryColor,
-              secondary: Icon(
-                Icons.volume_up,
-                size: 25,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            Container(height: lineHeight, color: Theme.of(context).primaryColor),
+            // Container(height: lineHeight, color: Theme.of(context).primaryColor),
+            // // Notification Setting
+            // SwitchListTile(
+            //   title: Text(
+            //     'Notifications',
+            //     style: TextStyle(
+            //       fontSize: 15,
+            //       fontWeight: FontWeight.bold,
+            //       color: Theme.of(context).primaryColor,
+            //     ),
+            //   ),
+            //   value: notificationEnabled,
+            //   onChanged: (value) {
+            //     setState(() {
+            //       notificationEnabled = value;
+            //     });
+            //   },
+            //   activeColor: Theme.of(context).primaryColor,
+            //   secondary: Icon(
+            //     Icons.notifications,
+            //     size: 25,
+            //     color: Theme.of(context).primaryColor,
+            //   ),
+            // ),
+            // Container(height: lineHeight, color: Theme.of(context).primaryColor),
+            //
+            // // Sound Setting
+            // SwitchListTile(
+            //   title: Text(
+            //     'Sound',
+            //     style: TextStyle(
+            //       fontSize: 15,
+            //       fontWeight: FontWeight.bold,
+            //       color: Theme.of(context).primaryColor,
+            //     ),
+            //   ),
+            //   value: soundProvider.isSoundOn,
+            //   onChanged: (value) {
+            //     soundProvider.toggleSound();
+            //     soundProvider.getSound();
+            //   },
+            //   activeColor: Theme.of(context).primaryColor,
+            //   secondary: Icon(
+            //     Icons.volume_up,
+            //     size: 25,
+            //     color: Theme.of(context).primaryColor,
+            //   ),
+            // ),
+            // Container(height: lineHeight, color: Theme.of(context).primaryColor),
 
             // Dark Mode Setting
             SwitchListTile(

@@ -9,7 +9,7 @@ import '../utils/globalMethodUtil.dart';
 
 class FirebaseRoomManagementProvider with ChangeNotifier {
   final _currentAuthUser = FirebaseAuth.instance.currentUser;
-
+  String _winnerId = '';
   Map<String, dynamic> _roomDetailsOnActivePool = {
     'roomId': '',
     'playerId1': '',
@@ -27,6 +27,8 @@ class FirebaseRoomManagementProvider with ChangeNotifier {
   Map<String, dynamic> get getRoomDetails{
     return _roomDetailsOnActivePool;
   }
+
+  String get getWinnerId => _winnerId;
 
   fetchRoomDetailsOnFirebase(Difficulty difficulty) async{
     _roomDetailsOnActivePool['roomId']= '';
@@ -167,4 +169,8 @@ class FirebaseRoomManagementProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  setWinnerId(String winnerId){
+    _winnerId = winnerId;
+    notifyListeners();
+  }
 }

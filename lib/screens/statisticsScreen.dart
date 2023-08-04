@@ -13,14 +13,7 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  bool _isLoading = false;
   bool isOnlineSelected = false; // Initially, "Online" is selected
-  // bool isEasy = true;
-  // bool isMedium = false;
-  // bool isHard= false;
-  // bool isMaster = false;
-  // bool isGrandmaster = false;
-  // bool isDoNotTry = false;
   String selectedDifficulty = 'Easy'; // Initially, "Easy" is selected
 
   // Simulated Firebase data
@@ -72,7 +65,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   //   // Add more data for other difficulty levels
   // };
 
-  Map<String, dynamic> gameDataSingleplayer = {
+  Map<String, dynamic> gameDataSinglePlayer = {
   };
 
   // Map<String, dynamic> gameDataSingleplayer = {
@@ -121,42 +114,27 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   //   // Add more data for other difficulty levels
   // };
 
-
-  Widget buildOnlineWidget(String difficulty) {
-    final difficultyData = gameDataMultiplayer[difficulty];
-    return StatisticsDetailsWidget(
-        difficulty: difficulty,
-        difficultyData: difficultyData,
-        isMultiplayer: isOnlineSelected
-    );
+  loadGameHistoryData(BuildContext ctx) async{
+    final userDataProvider = Provider.of<FirebaseUserDataProvider>(context, listen: true);
+    setState(() {
+      gameDataMultiplayer = userDataProvider.getOnlineGameHistory;
+      gameDataSinglePlayer = userDataProvider.getPracticeGameHistory;
+    });
   }
-
-  Widget buildOfflineWidget(String difficulty) {
-    // Replace this with your offline widget implementation
-    final difficultyData = gameDataSingleplayer[difficulty];
-    return StatisticsDetailsWidget(
-        difficulty: difficulty,
-        difficultyData: difficultyData,
-        isMultiplayer: isOnlineSelected
-    );
-  }
-
-
+  // @override
+  // void initState() {
+  //   // TODO: implement initState
+  //   super.initState();
+  //   loadGameHistoryData(context);
+  // }
 
   @override
   Widget build(BuildContext context) {
-    final userDataProvider = Provider.of<FirebaseUserDataProvider>(context, listen: false);
-      setState(() {
-        gameDataMultiplayer = userDataProvider.getOnlineGameHistory;
-        gameDataSingleplayer = userDataProvider.getPracticeGameHistory;
-      });
-
-
     final fixedTopButtonSize = MaterialStateProperty.all(
         Size(MediaQuery.sizeOf(context).width* 0.5, 40));
     final fixedSideButtonSize = MaterialStateProperty.all(
         Size(0, MediaQuery.sizeOf(context).height* 0.15,));
-
+    loadGameHistoryData(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -184,17 +162,18 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all(
                     isOnlineSelected
-                        ? Theme.of(context).primaryColor
+                        ? Theme.of(context).secondaryHeaderColor
                         : Theme.of(context).primaryColor.withAlpha(50),
                   ),
-                  minimumSize: fixedTopButtonSize
+                  minimumSize: fixedTopButtonSize,
+                    elevation: MaterialStateProperty.all(0)
 
                 ),
                 child: Text(
                   'Multiplayer',
                   style: TextStyle(
                     color: isOnlineSelected
-                        ? Theme.of(context).secondaryHeaderColor
+                        ? Theme.of(context).primaryColor
                         : Theme.of(context).primaryColor,
                       fontWeight: FontWeight.bold
                   ),
@@ -210,16 +189,17 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all(
                     !isOnlineSelected
-                        ? Theme.of(context).primaryColor
+                        ? Theme.of(context).secondaryHeaderColor
                         : Theme.of(context).primaryColor.withAlpha(50),
                   ),
-                  minimumSize: fixedTopButtonSize
+                  minimumSize: fixedTopButtonSize,
+                  elevation: MaterialStateProperty.all(0)
                 ),
                 child: Text(
                   'Pratice',
                   style: TextStyle(
                     color: !isOnlineSelected
-                        ? Theme.of(context).secondaryHeaderColor
+                        ? Theme.of(context).primaryColor
                         : Theme.of(context).primaryColor,
                     fontWeight: FontWeight.bold
                   ),
@@ -227,11 +207,10 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               ),
             ],
           ),
-
-
           Expanded(
             child: Row(
               children: [
+
                 SidebarButtonWidget(
                   difficultyLevels: ['Easy', 'Medium', 'Hard', 'Master', 'Grandmaster', 'Do Not Try'],
                   onPressed: (difficulty) {
@@ -242,18 +221,33 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   selectedDifficulty: selectedDifficulty,
                 ),
 
-
-
-                Expanded(
-                  child: isOnlineSelected ? buildOnlineWidget(selectedDifficulty) : buildOfflineWidget(selectedDifficulty),
-                ),
+                gameDataMultiplayer[selectedDifficulty] == null || gameDataSinglePlayer[selectedDifficulty] == null
+                  ? Expanded(
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      )
+                    )
+                  : Expanded(
+                      child: isOnlineSelected
+                      ? StatisticsDetailsWidget(
+                          difficulty: selectedDifficulty,
+                          difficultyData: gameDataMultiplayer[selectedDifficulty],
+                          isMultiplayer: isOnlineSelected
+                        )
+                      : StatisticsDetailsWidget(
+                          difficulty: selectedDifficulty,
+                          difficultyData: gameDataSinglePlayer[selectedDifficulty],
+                          isMultiplayer: isOnlineSelected
+                        ),
+              ),
               ]
             ),
           ),
-
-
         ],
       ),
     );
+
   }
 }

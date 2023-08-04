@@ -21,28 +21,14 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
 
-
-  @override
-  void initState() {
-    // TODO: implement initState
-
-    Future.delayed(const Duration(microseconds: 5), () async {
-      final userDataProvider = Provider.of<FirebaseUserDataProvider>(context, listen: false);
-      final User? user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await userDataProvider.fetchCustomUserProfileData();
-        await userDataProvider.fetchUserGameHistory();
-      }
-      // Navigator.of(context).pushReplacement(MaterialPageRoute(
-      //   builder: (ctx) => const TabsScreen(),
-      // ));
-    });
-    super.initState();
-  }
-
-
   @override
   Widget build(BuildContext context) {
+    bool userDataPresent =  false;
+    if(widget.isLoggedIn){
+      final User? user = FirebaseAuth.instance.currentUser;
+      userDataPresent = user != null ? true : false;
+    }
+
     Widget content = Container(
       color: Theme.of(context).primaryColor,
       padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 0),
@@ -99,7 +85,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ],
             ),
 
-            SizedBox(height: MediaQuery.sizeOf(context).height*0.2,),
+            SizedBox(height: MediaQuery.sizeOf(context).height*0.1,),
             Text(
               'By Mingle Bytes',
               style: TextStyle(
@@ -113,7 +99,7 @@ class _SplashScreenState extends State<SplashScreen> {
       ),
     );
 
-    return widget.isLoggedIn
+    return userDataPresent
         ? AnimatedSplashScreen(
           duration: 300,
           splash: content,

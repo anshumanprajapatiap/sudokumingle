@@ -17,6 +17,7 @@ class WinnerAnnouncement extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(20),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
               'Game Ended!',

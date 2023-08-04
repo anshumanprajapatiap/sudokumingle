@@ -1,8 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sudokumingle/screens/profileScreen.dart';
 import 'package:sudokumingle/screens/statisticsScreen.dart';
 
 import '../main.dart';
+import '../providers/firebaseUserDataProvider.dart';
+import '../utils/globalMethodUtil.dart';
 import 'homeScreen.dart';
 
 
@@ -39,8 +43,16 @@ class _TabsScreenState extends State<TabsScreen> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    FirebaseGlobalMethodUtil.initUserData(context);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     //final provider = Provider.of<GoogleSignInProvider>(context, listen:false);
+
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
         elevation: 10,

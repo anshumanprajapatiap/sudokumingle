@@ -6,113 +6,148 @@ import 'package:uuid/uuid.dart';
 
 import '../model/gameHistoryModel.dart';
 import '../utils/constants.dart';
+import '../utils/globalMethodUtil.dart';
 
-
+// Map<String, dynamic> gameDataMultiplayerConstantDataLocal = {
+//   'Easy': {
+//     'won': 0,
+//     'bestTime': '',
+//     'worstTime': '',
+//     'totalGames': 0,
+//     'winningPercentage': 0.0,
+//     'bestScore': 0,
+//     'avgScore': 0,
+//     'wonWithoutMistake': 0
+//   },
+//   'Hard': {
+//     'won': 0,
+//     'bestTime': '',
+//     'worstTime': '',
+//     'totalGames': 0,
+//     'winningPercentage': 0.0,
+//     'bestScore': 0,
+//     'avgScore': 0,
+//     'wonWithoutMistake': 0
+//   },
+//   'Medium': {
+//     'won': 0,
+//     'bestTime': '',
+//     'worstTime': '',
+//     'totalGames': 0,
+//     'winningPercentage': 0.0,
+//     'bestScore': 0,
+//     'avgScore': 0,
+//     'wonWithoutMistake': 0
+//   },
+//   'Master': {
+//     'won': 0,
+//     'bestTime': '',
+//     'worstTime': '',
+//     'totalGames': 0,
+//     'winningPercentage': 0.0,
+//     'bestScore': 0,
+//     'avgScore': 0,
+//     'wonWithoutMistake': 0
+//   },
+//   'Grandmaster': {
+//     'won': 0,
+//     'bestTime': '',
+//     'worstTime': '',
+//     'totalGames': 0,
+//     'winningPercentage': 0.0,
+//     'bestScore': 0,
+//     'avgScore': 0,
+//     'wonWithoutMistake': 0
+//   },
+//   'Do Not Try': {
+//     'won': 0,
+//     'bestTime': '',
+//     'worstTime': '',
+//     'totalGames': 0,
+//     'winningPercentage': 0.0,
+//     'bestScore': 0,
+//     'avgScore': 0,
+//     'wonWithoutMistake': 0
+//   },
+// };
+// Map<String, dynamic> gameDataSinglePlayerConstantDataLocal = {
+//   'Easy': {
+//     'won': 0,
+//     'bestTime': '',
+//     'worstTime': '',
+//     'totalGames': 0,
+//     'winningPercentage': 0.0,
+//     'bestScore': 0,
+//     'avgScore': 0,
+//     'wonWithoutMistake': 0
+//   },
+//   'Hard': {
+//     'won': 0,
+//     'bestTime': '',
+//     'worstTime': '',
+//     'totalGames': 0,
+//     'winningPercentage': 0.0,
+//     'bestScore': 0,
+//     'avgScore': 0,
+//     'wonWithoutMistake': 0
+//   },
+//   'Medium': {
+//     'won': 0,
+//     'bestTime': '',
+//     'worstTime': '',
+//     'totalGames': 0,
+//     'winningPercentage': 0.0,
+//     'bestScore': 0,
+//     'avgScore': 0,
+//     'wonWithoutMistake': 0
+//   },
+//   'Master': {
+//     'won': 0,
+//     'bestTime': '',
+//     'worstTime': '',
+//     'totalGames': 0,
+//     'winningPercentage': 0.0,
+//     'bestScore': 0,
+//     'avgScore': 0,
+//     'wonWithoutMistake': 0
+//   },
+//   'Grandmaster': {
+//     'won': 0,
+//     'bestTime': '',
+//     'worstTime': '',
+//     'totalGames': 0,
+//     'winningPercentage': 0.0,
+//     'bestScore': 0,
+//     'avgScore': 0,
+//     'wonWithoutMistake': 0
+//   },
+//   'Do Not Try': {
+//     'won': 0,
+//     'bestTime': '',
+//     'worstTime': '',
+//     'totalGames': 0,
+//     'winningPercentage': 0.0,
+//     'bestScore': 0,
+//     'avgScore': 0,
+//     'wonWithoutMistake': 0
+//   },
+// };
 
 
 class FirebaseUserDataProvider with ChangeNotifier {
-  Map<String, dynamic> gameDataMultiplayerConstantData = {
-    // 'Easy': {
-    //   'won': 0,
-    //   'bestTime': '',
-    //   'worstTime': '',
-    //   'totalGames': 0,
-    //   'winningPercentage': 0.0,
-    // },
-    // 'Hard': {
-    //   'won': 0,
-    //   'bestTime': '',
-    //   'worstTime': '',
-    //   'totalGames': 0,
-    //   'winningPercentage': 0.0,
-    // },
-    // 'Medium': {
-    //   'won': 0,
-    //   'bestTime': '',
-    //   'worstTime': '',
-    //   'totalGames': 0,
-    //   'winningPercentage': 0.0,
-    // },
-    // 'Master': {
-    //   'won': 0,
-    //   'bestTime': '',
-    //   'worstTime': '',
-    //   'totalGames': 0,
-    //   'winningPercentage': 0.0,
-    // },
-    // 'Grandmaster': {
-    //   'won': 0,
-    //   'bestTime': '',
-    //   'worstTime': '',
-    //   'totalGames': 0,
-    //   'winningPercentage': 0.0,
-    // },
-    // 'Do Not Try': {
-    //   'won': 0,
-    //   'bestTime': '',
-    //   'worstTime': '',
-    //   'totalGames': 0,
-    //   'winningPercentage': 0.0,
-    // },
-  };
-  Map<String, dynamic> gameDataSinglePlayerConstantData = {
-    // 'Easy': {
-    //   'won': 0,
-    //   'bestTime': '',
-    //   'worstTime': '',
-    //   'totalGames': 0,
-    //   'winningPercentage': 0.0,
-    // },
-    // 'Hard': {
-    //   'won': 0,
-    //   'bestTime': '',
-    //   'worstTime': '',
-    //   'totalGames': 0,
-    //   'winningPercentage': 0.0,
-    // },
-    // 'Medium': {
-    //   'won': 0,
-    //   'bestTime': '',
-    //   'worstTime': '',
-    //   'totalGames': 0,
-    //   'winningPercentage': 0.0,
-    // },
-    // 'Master': {
-    //   'won': 0,
-    //   'bestTime': '',
-    //   'worstTime': '',
-    //   'totalGames': 0,
-    //   'winningPercentage': 0.0,
-    // },
-    // 'Grandmaster': {
-    //   'won': 0,
-    //   'bestTime': '',
-    //   'worstTime': '',
-    //   'totalGames': 0,
-    //   'winningPercentage': 0.0,
-    // },
-    // 'Do Not Try': {
-    //   'won': 0,
-    //   'bestTime': '',
-    //   'worstTime': '',
-    //   'totalGames': 0,
-    //   'winningPercentage': 0.0,
-    // },
-  };
-
-  final _currentAuthUser = FirebaseAuth.instance.currentUser!;
+  bool _isGameHistoryDataFetched = false;
+  final _currentAuthUser = FirebaseAuth.instance.currentUser;
   Map<String, dynamic> _userData = {};
   Map<String, dynamic> _practiceGameHistory = {};
   Map<String, dynamic> _onlineGameHistory = {};
+  Map<String, dynamic> get getUserData => _userData;
+  Map<String, dynamic> get getPracticeGameHistory => _practiceGameHistory;
+  Map<String, dynamic> get getOnlineGameHistory => _onlineGameHistory;
+  bool get getGameHistoryDataFetched => _isGameHistoryDataFetched;
 
-  Map<String, dynamic> get getUserData {
-    return _userData;
-  }
-  Map<String, dynamic> get getPracticeGameHistory{
-    return _practiceGameHistory;
-  }
-  Map<String, dynamic> get getOnlineGameHistory{
-    return _onlineGameHistory;
+  setGameHistoryDataFetched(){
+    _isGameHistoryDataFetched = true;
+    notifyListeners();
   }
 
   fetchCustomUserProfileData() async {
@@ -126,7 +161,7 @@ class FirebaseUserDataProvider with ChangeNotifier {
       Map<String, dynamic> userData = userSnapshotDoc.data() as Map<String, dynamic>;
 
       _userData = {
-        'userFirstName': _currentAuthUser.displayName,
+        'userFirstName': _currentAuthUser!.displayName ?? '',
         'coins': userData['mingleCoins'],
         'userRank': userData['rank'],
         'userAvatar': userData['userAvatar']
@@ -191,7 +226,9 @@ class FirebaseUserDataProvider with ChangeNotifier {
             'difficultyLevel': element.get('difficulty'),
             'createdAt': element.get('createdAt'),
             'endedAt': element.get('endedAt'),
-            'isWinner': element.get('winnerId') == _currentAuthUser!.uid ? true : false
+            'isWinner': element.get('winnerId') == _currentAuthUser!.uid ? true : false,
+            'score':  element.get('playerId1') == _currentAuthUser!.uid ? element.get('player1Points') : element.get('player1Points'),
+            'mistakes': element.get('playerId1') == _currentAuthUser!.uid ? element.get('player1Mistake') : element.get('player2Mistake')
           };
           onlineGameHistory.insert(
             0,
@@ -199,9 +236,6 @@ class FirebaseUserDataProvider with ChangeNotifier {
           );
         });
     });
-
-    print(onlineGameHistory);
-
     await FirebaseFirestore.instance
         .collection(Constants.CUSTOM_USER_PROFILE)
         .doc(_currentAuthUser!.uid)
@@ -224,15 +258,15 @@ class FirebaseUserDataProvider with ChangeNotifier {
         );
       });
     });
-    print(onlineGameHistory);
 
+    print('onlineGameHistory $onlineGameHistory');
+    print('practiceGameHistory $practiceGameHistory');
     calculateStatistics(onlineGameHistory, practiceGameHistory);
-
+    setGameHistoryDataFetched();
     notifyListeners();
   }
 
   calculateStatistics(List<Map<String, dynamic>> onlineGameHistory, List<Map<String, dynamic>> practiceGameHistory){
-
     Map<String, dynamic> gameDataMultiplayerConstantDataLocal = {
       'Easy': {
         'won': 0,
@@ -360,23 +394,37 @@ class FirebaseUserDataProvider with ChangeNotifier {
 
 
     for (var game in onlineGameHistory) {
+      Timestamp createdAtTimestamp = game['createdAt'];
+      Timestamp endedAtTimestamp = game['endedAt'];
+      DateTime createdAt = createdAtTimestamp.toDate();
+      DateTime endedAt = endedAtTimestamp.toDate();
+      Duration timeDifference = endedAt.difference(createdAt);
       String difficultyLevel = game['difficultyLevel'];
 
       if (gameDataMultiplayerConstantDataLocal.containsKey(difficultyLevel)) {
         gameDataMultiplayerConstantDataLocal[difficultyLevel]['won'] += game['isWinner'] ? 1 : 0;
+        gameDataMultiplayerConstantDataLocal[difficultyLevel]['wonWithoutMistake'] += game['isWinner'] ?game['mistakes']==0 ?1 :0 :0;
 
-        // if (gameDataMultiplayer[difficultyLevel]['bestTime'] == '' ||
-        //     game['endedAt'] < gameDataMultiplayer[difficultyLevel]['bestTime']) {
-        //   gameDataMultiplayer[difficultyLevel]['bestTime'] = game['endedAt'];
-        // }
-        //
-        // if (gameDataMultiplayer[difficultyLevel]['worstTime'] == '' ||
-        //     game['endedAt'] > gameDataMultiplayer[difficultyLevel]['worstTime']) {
-        //   gameDataMultiplayer[difficultyLevel]['worstTime'] = game['endedAt'];
-        // }
+        if(gameDataMultiplayerConstantDataLocal[difficultyLevel]['bestTime'] == ''){
+          gameDataMultiplayerConstantDataLocal[difficultyLevel]['bestTime'] = timeDifference;
+        }else{
+          if(gameDataMultiplayerConstantDataLocal[difficultyLevel]['bestTime'] > timeDifference){
+            gameDataMultiplayerConstantDataLocal[difficultyLevel]['bestTime'] = timeDifference;
+          }
+        }
+        if(gameDataMultiplayerConstantDataLocal[difficultyLevel]['worstTime'] == ''){
+          gameDataMultiplayerConstantDataLocal[difficultyLevel]['worstTime'] = timeDifference;
+        }else{
+          if(gameDataMultiplayerConstantDataLocal[difficultyLevel]['worstTime'] < timeDifference){
+            gameDataMultiplayerConstantDataLocal[difficultyLevel]['worstTime'] = timeDifference;
+          }
+        }
 
-
-
+        if(gameDataMultiplayerConstantDataLocal[difficultyLevel]['bestScore'] < game['score']){
+          print('${gameDataMultiplayerConstantDataLocal[difficultyLevel]['bestScore']} ->  ${game['score']}');
+          gameDataMultiplayerConstantDataLocal[difficultyLevel]['bestScore'] = game['score'];
+        }
+        gameDataMultiplayerConstantDataLocal[difficultyLevel]['avgScore'] += game['score'];
         gameDataMultiplayerConstantDataLocal[difficultyLevel]['totalGames'] += 1;
       }
     }
@@ -445,7 +493,7 @@ class FirebaseUserDataProvider with ChangeNotifier {
 
     Map<String, dynamic> gameDataToAdd = {
       'gameId': gameData.gameId,
-      'playerId1': isMultiplayer ? gameData.playerId1 : _currentAuthUser.uid,
+      'playerId1': isMultiplayer ? gameData.playerId1 : _currentAuthUser!.uid,
       'playerId2': gameData.playerId2,
       'difficulty': gameData.difficultyLevel,
       'winnerId': gameData.winnerId,
@@ -472,86 +520,82 @@ class FirebaseUserDataProvider with ChangeNotifier {
       //add to local list as well
     }
 
-    updateGameDataMultiplayer(gameData.difficultyLevel, isMultiplayer, gameDataToAdd);
-   int coinAdded = getCoinValue(gameData.difficultyLevel, _currentAuthUser!.uid, gameData.winnerId, isMultiplayer: isMultiplayer );
+    updateGameDataOnLocalList(gameData.difficultyLevel, isMultiplayer, gameDataToAdd);
+    int coinAdded = GlobalMethodUtil.getCoinValue(gameData.difficultyLevel, _currentAuthUser!.uid, gameData.winnerId, isMultiplayer: isMultiplayer );
 
     setCustomUserProfileDataCoin(coinAdded);
     setCustomUserProfileDataRank();
     notifyListeners();
   }
 
-  int getCoinValue(String difficultyLevel, String currentUserId, String winnerId, {required bool isMultiplayer}){
-    int coinAdded = 0;
-    if(difficultyLevel == 'Easy'){
-      if(isMultiplayer){
-        coinAdded = currentUserId==winnerId ? 200:-200;
-      }
-      else{
-        coinAdded = currentUserId==winnerId ? 100:-100;
-      }
-    }
-    else if(difficultyLevel == 'Medium'){
-      if(isMultiplayer){
-        coinAdded = currentUserId==winnerId ? 400:-400;
-      }
-      else{
-        coinAdded = currentUserId==winnerId ? 200:-200;
-      }
-    }
-    else if(difficultyLevel == 'Hard'){
-      if(isMultiplayer){
-        coinAdded = currentUserId==winnerId ? 600:-600;
-      }
-      else{
-        coinAdded = currentUserId==winnerId ? 300:-300;
-      }
-    }
-    else if(difficultyLevel == 'Master'){
-      if(isMultiplayer){
-        coinAdded = currentUserId==winnerId ? 800:-800;
-      }
-      else{
-        coinAdded = currentUserId==winnerId ? 400:-400;
-      }
-    }
-    else if(difficultyLevel == 'Grandmaster'){
-      if(isMultiplayer){
-        coinAdded = currentUserId==winnerId ? 1000:-1000;
-      }
-      else{
-        coinAdded = currentUserId==winnerId ? 500:-500;
-      }
-    }
-    else if(difficultyLevel == 'Do Not Try'){
-      if(isMultiplayer){
-        coinAdded = currentUserId==winnerId ? 1200:-1200;
-      }
-      else{
-        coinAdded = currentUserId==winnerId ? 600:-600;
-      }
-    }
-    return coinAdded;
-  }
-
-  void updateGameDataMultiplayer(String difficultyLevel, bool isMultiplayer, Map<String, dynamic> singleData) {
+  void updateGameDataOnLocalList(String difficultyLevel, bool isMultiplayer, Map<String, dynamic> singleData) {
 
     if (!_practiceGameHistory.containsKey(difficultyLevel) || !_onlineGameHistory.containsKey(difficultyLevel)) {
       // If the difficulty level doesn't exist in the map, return.
       return;
     }
+    Timestamp createdAtTimestamp = singleData['createdAt'];
+    Timestamp endedAtTimestamp = singleData['endedAt'];
+    DateTime createdAt = createdAtTimestamp.toDate();
+    DateTime endedAt = endedAtTimestamp.toDate();
+    Duration timeDifference = endedAt.difference(createdAt);
+
     if(isMultiplayer) {
       _onlineGameHistory[difficultyLevel]['won'] += singleData['winnerId'] == _currentAuthUser!.uid ? 1 : 0;
+      if(_onlineGameHistory[difficultyLevel]['bestTime'] == ''){
+        _onlineGameHistory[difficultyLevel]['bestTime'] = timeDifference;
+      }
+      else{
+        if(_onlineGameHistory[difficultyLevel]['bestTime'] > timeDifference){
+          _onlineGameHistory[difficultyLevel]['bestTime'] = timeDifference;
+        }
+      }
+      if(_onlineGameHistory[difficultyLevel]['worstTime'] == ''){
+        _onlineGameHistory[difficultyLevel]['worstTime'] = timeDifference;
+      }else{
+        if(_onlineGameHistory[difficultyLevel]['worstTime'] < timeDifference){
+          _onlineGameHistory[difficultyLevel]['worstTime'] = timeDifference;
+        }
+      }
+
+      if(_onlineGameHistory[difficultyLevel]['bestScore'] < singleData['score']){
+        print('${_onlineGameHistory[difficultyLevel]['bestScore']} ->  ${singleData['score']}');
+        _onlineGameHistory[difficultyLevel]['bestScore'] = singleData['score'];
+      }
+      _onlineGameHistory[difficultyLevel]['avgScore'] += singleData['score'];
       _onlineGameHistory[difficultyLevel]['totalGames']++;
       // _onlineGameHistory[difficultyLevel]['winningPercentage'] = (_onlineGameHistory[difficultyLevel]['won'] / _onlineGameHistory[difficultyLevel]['totalGames']) * 100;
     }
     else {
-      _onlineGameHistory[difficultyLevel]['won'] += singleData['isWinner'] == _currentAuthUser!.uid ? 1 : 0;
+      int score = singleData['player1Points'];
+      _practiceGameHistory[difficultyLevel]['won'] += singleData['isWinner'] == _currentAuthUser!.uid ? 1 : 0;
+      _practiceGameHistory[difficultyLevel]['wonWithoutMistake'] += singleData['winnerId'] == _currentAuthUser!.uid ? singleData['player1Mistake'] == 0 ? 1 :0 :0;
+      if(_practiceGameHistory[difficultyLevel]['bestTime'] == ''){
+        _practiceGameHistory[difficultyLevel]['bestTime'] = timeDifference;
+      }
+      else{
+        if(_practiceGameHistory[difficultyLevel]['bestTime'] > timeDifference){
+          _practiceGameHistory[difficultyLevel]['bestTime'] = timeDifference;
+        }
+      }
+      if(_practiceGameHistory[difficultyLevel]['worstTime'] == ''){
+        _practiceGameHistory[difficultyLevel]['worstTime'] = timeDifference;
+      }else{
+        if(_practiceGameHistory[difficultyLevel]['worstTime'] < timeDifference){
+          _practiceGameHistory[difficultyLevel]['worstTime'] = timeDifference;
+        }
+      }
+
+      if(_practiceGameHistory[difficultyLevel]['bestScore'] < score){
+        _practiceGameHistory[difficultyLevel]['bestScore'] = score;
+      }
+      _practiceGameHistory[difficultyLevel]['avgScore'] += score;
       _practiceGameHistory[difficultyLevel]['totalGames']++;
       // _practiceGameHistory[difficultyLevel]['winningPercentage'] = (_practiceGameHistory[difficultyLevel]['won'] / _practiceGameHistory[difficultyLevel]['totalGames']) * 100;
 
     }
-    notifyListeners();
 
+    notifyListeners();
   }
 
   void addOnlineGameDataToGameHistory(String gameId) async{
@@ -583,14 +627,138 @@ class FirebaseUserDataProvider with ChangeNotifier {
   }
 
   void deleteOnlineGameHistoryData(){
+    Map<String, dynamic> gameDataMultiplayerConstantDataLocal = {
+      'Easy': {
+        'won': 0,
+        'bestTime': '',
+        'worstTime': '',
+        'totalGames': 0,
+        'winningPercentage': 0.0,
+        'bestScore': 0,
+        'avgScore': 0,
+        'wonWithoutMistake': 0
+      },
+      'Hard': {
+        'won': 0,
+        'bestTime': '',
+        'worstTime': '',
+        'totalGames': 0,
+        'winningPercentage': 0.0,
+        'bestScore': 0,
+        'avgScore': 0,
+        'wonWithoutMistake': 0
+      },
+      'Medium': {
+        'won': 0,
+        'bestTime': '',
+        'worstTime': '',
+        'totalGames': 0,
+        'winningPercentage': 0.0,
+        'bestScore': 0,
+        'avgScore': 0,
+        'wonWithoutMistake': 0
+      },
+      'Master': {
+        'won': 0,
+        'bestTime': '',
+        'worstTime': '',
+        'totalGames': 0,
+        'winningPercentage': 0.0,
+        'bestScore': 0,
+        'avgScore': 0,
+        'wonWithoutMistake': 0
+      },
+      'Grandmaster': {
+        'won': 0,
+        'bestTime': '',
+        'worstTime': '',
+        'totalGames': 0,
+        'winningPercentage': 0.0,
+        'bestScore': 0,
+        'avgScore': 0,
+        'wonWithoutMistake': 0
+      },
+      'Do Not Try': {
+        'won': 0,
+        'bestTime': '',
+        'worstTime': '',
+        'totalGames': 0,
+        'winningPercentage': 0.0,
+        'bestScore': 0,
+        'avgScore': 0,
+        'wonWithoutMistake': 0
+      },
+    };
     deleteAllDocumentsFromCollection(Constants.USER_GAME_HISTORY);
-    _onlineGameHistory = gameDataMultiplayerConstantData;
+    _onlineGameHistory = gameDataMultiplayerConstantDataLocal;
     notifyListeners();
   }
 
   void deleteOfflineGameHistoryData(){
+    Map<String, dynamic> gameDataSinglePlayerConstantDataLocal = {
+      'Easy': {
+        'won': 0,
+        'bestTime': '',
+        'worstTime': '',
+        'totalGames': 0,
+        'winningPercentage': 0.0,
+        'bestScore': 0,
+        'avgScore': 0,
+        'wonWithoutMistake': 0
+      },
+      'Hard': {
+        'won': 0,
+        'bestTime': '',
+        'worstTime': '',
+        'totalGames': 0,
+        'winningPercentage': 0.0,
+        'bestScore': 0,
+        'avgScore': 0,
+        'wonWithoutMistake': 0
+      },
+      'Medium': {
+        'won': 0,
+        'bestTime': '',
+        'worstTime': '',
+        'totalGames': 0,
+        'winningPercentage': 0.0,
+        'bestScore': 0,
+        'avgScore': 0,
+        'wonWithoutMistake': 0
+      },
+      'Master': {
+        'won': 0,
+        'bestTime': '',
+        'worstTime': '',
+        'totalGames': 0,
+        'winningPercentage': 0.0,
+        'bestScore': 0,
+        'avgScore': 0,
+        'wonWithoutMistake': 0
+      },
+      'Grandmaster': {
+        'won': 0,
+        'bestTime': '',
+        'worstTime': '',
+        'totalGames': 0,
+        'winningPercentage': 0.0,
+        'bestScore': 0,
+        'avgScore': 0,
+        'wonWithoutMistake': 0
+      },
+      'Do Not Try': {
+        'won': 0,
+        'bestTime': '',
+        'worstTime': '',
+        'totalGames': 0,
+        'winningPercentage': 0.0,
+        'bestScore': 0,
+        'avgScore': 0,
+        'wonWithoutMistake': 0
+      },
+    };
     deleteAllDocumentsFromCollection(Constants.USER_PRACTICE_HISTORY);
-    _practiceGameHistory = gameDataSinglePlayerConstantData;
+    _practiceGameHistory = gameDataSinglePlayerConstantDataLocal;
     notifyListeners();
   }
 

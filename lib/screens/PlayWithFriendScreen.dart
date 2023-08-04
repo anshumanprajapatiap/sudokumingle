@@ -614,6 +614,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
 
     final firebaseGamePoolProvider = Provider.of<FirebaseGamePoolProvider>(context, listen: false);
     final firebaseUserDataProvider = Provider.of<FirebaseUserDataProvider>(context, listen: false);
+    final firebaseRoomManagementProvider = Provider.of<FirebaseRoomManagementProvider>(context, listen: false);
 
     return Scaffold(
         appBar: AppBar(
@@ -628,7 +629,9 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
 
             if (snapshot.hasError) {
               // Handle error
-              return Text('Error: ${snapshot.error}');
+              String wId = firebaseRoomManagementProvider.getWinnerId;
+              return WinnerAnnouncement(winnerId: wId, currentUserId: currentUser!.uid);
+              // return Text('Error: ${snapshot.error}');
             }
 
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -663,7 +666,9 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
 
                           if (snapshot.hasError) {
                             // Handle error
-                            return Text('Error: ${snapshot.error}');
+                            // return Text('Error: ${snapshot.error}');
+                            String wId = firebaseRoomManagementProvider.getWinnerId;
+                            return WinnerAnnouncement(winnerId: wId, currentUserId: currentUser!.uid);
                           }
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             // Show loading indicator while waiting for data
@@ -679,6 +684,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                               }
                               if(gameData['winnerId']!=''){
                                 firebaseUserDataProvider.addOnlineGameDataToGameHistory(data['gameId']);
+                                firebaseRoomManagementProvider.setWinnerId(data['gameId']);
                                 return WinnerAnnouncement(winnerId: gameData['winnerId'], currentUserId: currentUser!.uid);
                               }
                               return const Text('Calculating Results');
@@ -698,7 +704,8 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                           }
                           else {
                             // Document does not exist
-                            return Text('Game Over');
+                            String wId = firebaseRoomManagementProvider.getWinnerId;
+                            return WinnerAnnouncement(winnerId: wId, currentUserId: currentUser!.uid);
                           }
                         },
                       );

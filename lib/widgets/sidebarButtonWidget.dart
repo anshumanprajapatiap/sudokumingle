@@ -31,9 +31,10 @@ class SidebarButtonWidget extends StatelessWidget {
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(
                   selectedDifficulty == difficulty
-                      ? Theme.of(context).primaryColor
+                      ? Theme.of(context).secondaryHeaderColor
                       : Theme.of(context).primaryColor.withAlpha(50),
                 ),
+                elevation: MaterialStateProperty.all(0),
                 minimumSize: fixedSideButtonSize,
               ),
               child: RotatedBox(
@@ -42,8 +43,8 @@ class SidebarButtonWidget extends StatelessWidget {
                   difficulty,
                   style: TextStyle(
                     color: selectedDifficulty != difficulty
-                        ? Theme.of(context).primaryColor.withOpacity(0.7)
-                        : Theme.of(context).secondaryHeaderColor,
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).primaryColor,
                   ),
                 ),
               ),

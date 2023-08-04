@@ -36,7 +36,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
   FirebaseGlobalMethodActiveGamePoolUtil firebaseGlobalMethodActiveGamePoolUtil = FirebaseGlobalMethodActiveGamePoolUtil();
   User? currentUser = FirebaseAuth.instance.currentUser;
   Timer? searchTimer;
-  bool _isLoading = true;
+  // bool _isLoading = true;
   AudioPlayer audioPlayer = AudioPlayer();
   AudioCache? audioCache;
   bool isGameEnded = false;
@@ -326,11 +326,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  /* Testing
-                  widget.isPlayer1
-                      ? Text('OpponentId -> ${widget.playerId2}')
-                      : Text('OpponentId -> ${widget.playerId1}'),
-                   */
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [

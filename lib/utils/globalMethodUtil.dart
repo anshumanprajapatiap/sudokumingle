@@ -1,7 +1,10 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/firebaseUserDataProvider.dart';
 import 'constants.dart';
 
 class GlobalMethodUtil{
@@ -59,14 +62,71 @@ class GlobalMethodUtil{
   }
 
 
-  static bool canPop(BuildContext context) {
-    final NavigatorState? navigator = Navigator.maybeOf(context);
-    return navigator != null && navigator.canPop();
+  static int getCoinValue(String difficultyLevel, String currentUserId, String winnerId, {required bool isMultiplayer}){
+    int coinAdded = 0;
+    if(difficultyLevel == 'Easy'){
+      if(isMultiplayer){
+        coinAdded = currentUserId==winnerId ? 200:-200;
+      }
+      else{
+        coinAdded = currentUserId==winnerId ? 100:-100;
+      }
+    }
+    else if(difficultyLevel == 'Medium'){
+      if(isMultiplayer){
+        coinAdded = currentUserId==winnerId ? 400:-400;
+      }
+      else{
+        coinAdded = currentUserId==winnerId ? 200:-200;
+      }
+    }
+    else if(difficultyLevel == 'Hard'){
+      if(isMultiplayer){
+        coinAdded = currentUserId==winnerId ? 600:-600;
+      }
+      else{
+        coinAdded = currentUserId==winnerId ? 300:-300;
+      }
+    }
+    else if(difficultyLevel == 'Master'){
+      if(isMultiplayer){
+        coinAdded = currentUserId==winnerId ? 800:-800;
+      }
+      else{
+        coinAdded = currentUserId==winnerId ? 400:-400;
+      }
+    }
+    else if(difficultyLevel == 'Grandmaster'){
+      if(isMultiplayer){
+        coinAdded = currentUserId==winnerId ? 1000:-1000;
+      }
+      else{
+        coinAdded = currentUserId==winnerId ? 500:-500;
+      }
+    }
+    else if(difficultyLevel == 'Do Not Try'){
+      if(isMultiplayer){
+        coinAdded = currentUserId==winnerId ? 1200:-1200;
+      }
+      else{
+        coinAdded = currentUserId==winnerId ? 600:-600;
+      }
+    }
+    return coinAdded;
   }
 
 }
 
 class FirebaseGlobalMethodUtil{
+
+  static void initUserData(BuildContext context) async {
+    final userDataProvider = Provider.of<FirebaseUserDataProvider>(context, listen: false);
+    final User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await userDataProvider.fetchCustomUserProfileData();
+      await userDataProvider.fetchUserGameHistory();
+    }
+  }
 
   static void deleteDocument(String collectionName, String documentId) {
     FirebaseFirestore.instance
@@ -89,6 +149,20 @@ class FirebaseGlobalMethodActiveGamePoolUtil{
 
     DocumentReference activeGameDocRef = FirebaseFirestore.instance.collection(Constants.ACTIVE_GAME_POOL).doc(gameId);
 
+    activeGameDocRef.get().then((documentSnapshot) async{
+      if (documentSnapshot.exists) {
+        Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
+        if (data['isGameEnded']) {
+          // Game is ended, handle accordingly
+          // For example, show a message or perform an action
+          return;
+        }
+      }
+    }).catchError((error) {
+      // Handle the error if there's an issue with fetching the document
+      print("Error fetching document: $error");
+    });
+
     if(isPlayer1){
       await activeGameDocRef.update({
         'isGameEnded': true,
@@ -110,6 +184,7 @@ class FirebaseGlobalMethodActiveGamePoolUtil{
       });
 
     }
+
     // await Future.delayed(Duration(seconds: 3), () {print('deplayed1');});
     // fetchUserFromActiveGamePoolContinuously(widget.activeGameId, ctx);
   }
@@ -168,4 +243,6 @@ class FirebaseGlobalMethodActiveGamePoolUtil{
 
     }
   }
+
+
 }
