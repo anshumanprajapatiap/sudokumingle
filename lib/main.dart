@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:sudokumingle/providers/darkThemeProvider.dart';
 import 'package:sudokumingle/providers/firebaseGamePoolProvider.dart';
@@ -16,7 +18,11 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //await MobileAds.instance.initialize();
+  if (!kIsWeb) {
+    await MobileAds.instance.initialize();
+  } else {
+    // print('AdMob skipped for Ios');
+  }
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -31,7 +37,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => FirebaseUserDataProvider()),
         ChangeNotifierProvider(create: (_) => FirebaseGamePoolProvider())
       ],
-      child: MyApp(),
+      child: const MyApp(),
     )
     );
   });
@@ -49,32 +55,25 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return Consumer<ThemeSwitchProvider>(
       builder: (context, themeProvider, _) {
-        print(themeProvider.getTheme());
         return MaterialApp(
           routes: {
             TabsScreen.routeName: (ctx) => const TabsScreen(),
-            // Add other routes here if needed
           },
           title: 'My App',
           theme: themeProvider.getTheme(),
-          //home: TabsScreen(),
           home: StreamBuilder(
             stream: FirebaseAuth.instance.authStateChanges(),
             builder: (ctx, snapshot) {
-              //print(snapshot.data!.displayName);
-              //splash Screen
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return CircularProgressIndicator(
                   color: Theme.of(context).primaryColor,
                 );
               } else if (snapshot.hasData) {
-                // toward dashboard
-                return SplashScreen(isLoggedIn: true);
+                return const SplashScreen(isLoggedIn: true);
               } else if (snapshot.hasError) {
-                return Center(child: const Text('Check your connection, Something Went Wrong!'));
+                return const Center(child: Text('Check your connection, Something Went Wrong!'));
               } else {
-                // towards login page
-                return SplashScreen(isLoggedIn: false);
+                return const SplashScreen(isLoggedIn: false);
               }
             },
           ),

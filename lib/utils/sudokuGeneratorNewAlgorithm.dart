@@ -91,19 +91,19 @@ class SudokuGenerator {
         emptyCells = 2;
         break;
       case Difficulty.medium:
-        emptyCells = 50;
+        emptyCells = 40;
         break;
       case Difficulty.hard:
-        emptyCells = 60;
+        emptyCells = 50;
         break;
       case Difficulty.master:
-        emptyCells = 65;
+        emptyCells = 55;
         break;
       case Difficulty.grandmaster:
-        emptyCells = 70;
+        emptyCells = 60;
         break;
       case Difficulty.donnottry:
-        emptyCells = 75;
+        emptyCells = 65;
         break;
     }
 

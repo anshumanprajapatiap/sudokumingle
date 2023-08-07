@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/firebaseUserDataProvider.dart';
+import '../utils/adMobUtility.dart';
 
 class AdDialogBoxWidget extends StatefulWidget {
   @override
   _AdDialogBoxWidgetState createState() => _AdDialogBoxWidgetState();
 }
 
-class _AdDialogBoxWidgetState extends State<AdDialogBoxWidget> {
-  int _secondsRemaining = 6;
+class _AdDialogBoxWidgetState extends State<AdDialogBoxWidget>  with WidgetsBindingObserver{
+  int _secondsRemaining = 5;
   bool _timerExpired = false;
 
   void startTimer() {
-    Future.delayed(Duration(seconds: 1), () {
+    Future.delayed(const Duration(seconds: 1), () {
       if (mounted) {
         setState(() {
           if (_secondsRemaining > 0) {
@@ -26,6 +28,10 @@ class _AdDialogBoxWidgetState extends State<AdDialogBoxWidget> {
       startTimer();
     });
   }
+
+
+
+
 
   @override
   void initState() {
@@ -57,6 +63,7 @@ class _AdDialogBoxWidgetState extends State<AdDialogBoxWidget> {
               style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 15, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 5,),
+
             
             SizedBox(
               height: MediaQuery.sizeOf(context).height*0.5,
@@ -65,6 +72,7 @@ class _AdDialogBoxWidgetState extends State<AdDialogBoxWidget> {
                 color: Theme.of(context).primaryColor,
               ),
             ),
+
             SizedBox(height: 20),
             _timerExpired
                 ? ElevatedButton(
@@ -80,12 +88,12 @@ class _AdDialogBoxWidgetState extends State<AdDialogBoxWidget> {
             )
                 : ElevatedButton(
                 onPressed: (){
-
                 },
                 style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor.withAlpha(500)),
                     minimumSize: MaterialStateProperty.all(Size(MediaQuery.sizeOf(context).width*0.5, 40)),
                 ),
+
                 child: Text('$_secondsRemaining seconds remaining...')
               ),
           ],

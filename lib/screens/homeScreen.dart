@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:sudokumingle/providers/firebaseUserDataProvider.dart';
 import 'package:sudokumingle/screens/praticeOfflineScreen.dart';
@@ -8,6 +9,7 @@ import 'package:sudokumingle/utils/SudokuBoardEnums.dart';
 import 'package:sudokumingle/widgets/adDialogBoxWidget.dart';
 
 import '../providers/firebaseRoomManagementProvider.dart';
+import '../utils/adMobUtility.dart';
 import '../utils/constants.dart';
 import '../widgets/cardWidget.dart';
 import '../widgets/scrollableCarouselWidget.dart';
@@ -31,10 +33,110 @@ class _HomeScreenState extends State<HomeScreen> {
   //   'userRank': 0
   // };
 
+  // /* all about adds */
+  // late BannerAd bannerAd;
+  // bool _isAdLoaded = false;
+  // String productionBannerAdUnitId = '{makingerror}ca-app-pub-1710164244221834/9253797898';
+  // String developmentBannerAdUnitId = 'ca-app-pub-3940256099942544/6300978111';
+  // initBannerAd(){
+  //   bannerAd = BannerAd(
+  //       size: AdSize.banner,
+  //       adUnitId: developmentBannerAdUnitId,
+  //       listener: BannerAdListener(
+  //         onAdLoaded: (ad) {
+  //           setState(() {
+  //             _isAdLoaded = true;
+  //           });
+  //         },
+  //         onAdFailedToLoad: (ad, error) {
+  //           ad.dispose();
+  //           print(error);
+  //         }
+  //       ),
+  //       request: AdRequest()
+  //   );
+  //   bannerAd.load();
+  // }
+
+
+  AdMobUtility adMobUtility = AdMobUtility();
+
+  late InterstitialAd interstitialAd;
+  late BannerAd bannerAd;
+  RewardedAd? rewardedAd;
+  initBannerAd(){
+    bannerAd = adMobUtility.bottomBarAd();
+    bannerAd.load();
+  }
+
+  void winCoinAd(){
+
+    InterstitialAd.load(
+      adUnitId: adMobUtility.developmentCoinWinAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad){
+          interstitialAd = ad;
+        },
+        onAdFailedToLoad: ((error) {
+          interstitialAd.dispose();
+        }),
+      ),
+    );
+  }
+
+  void rewardedAdFn(){
+    RewardedAd.load(
+        adUnitId: adMobUtility.developmentRewardedAdUnitId,
+        request: const AdRequest(),
+        rewardedAdLoadCallback: RewardedAdLoadCallback(
+            onAdLoaded: (ad){
+
+              setState(() {
+                rewardedAd = ad;
+              });
+
+            },
+            onAdFailedToLoad: (error){
+              setState(() {
+                rewardedAd = null;
+              });
+
+            }
+        )
+    );
+
+  }
+
+  void showRewardedAd(BuildContext ctx){
+    final firebaseUserDataProviderReward = Provider.of<FirebaseUserDataProvider>(ctx, listen: false);
+    if(rewardedAd != null){
+      rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (ad){
+          ad.dispose();
+          rewardedAdFn();
+        },
+        onAdFailedToShowFullScreenContent: (ad, error){
+          ad.dispose();
+          rewardedAdFn();
+        },
+      );
+      rewardedAd!.show(
+          onUserEarnedReward: (ad, reward) {
+            firebaseUserDataProviderReward.setCustomUserProfileDataCoin(150);
+          }
+      );
+    }
+  }
+
+
   List<Map<String, dynamic>> contestData = [
-    // {'color': Colors.blue},
-    // {'color': Colors.red},
-    // {'color': Colors.green},
+    {'color': Colors.blueGrey},
+    {'color': Colors.blueGrey},
+    {'color': Colors.blueGrey},
+    {'color': Colors.blueGrey},
+    {'color': Colors.blueGrey},
+    {'color': Colors.blueGrey},
   ];
 
   Future<Difficulty> showDifficultyDialog(BuildContext context) async {
@@ -84,6 +186,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                     : FontWeight.normal,
                               ),
                             ),
+                            // trailing: Text(
+                            //     '${100.toString()}',
+                            //   style: TextStyle(
+                            //     color: Theme.of(context).primaryColor
+                            //   ),
+                            // ),
                             onTap: () {
                               setState(() {
                                 selectedDifficulty = level;
@@ -141,15 +249,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return selectedDifficulty;
   }
 
-  void showAdDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AdDialogBoxWidget();
-      },
-    );
-  }
+  // void showAdDialog(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (BuildContext context) {
+  //       return AdDialogBoxWidget();
+  //     },
+  //   );
+  // }
 
   void navigateToPlayWithFriendScreen(BuildContext context, Difficulty selectedDifficulty, String roomId) {
     Navigator.push(
@@ -162,6 +270,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    winCoinAd();
+    initBannerAd();
+    rewardedAdFn();
   }
 
   final topHeading = const TextStyle(
@@ -184,6 +295,15 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.blueGrey
           ),
         ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                showRewardedAd(context);
+                // interstitialAd.show();
+                // showAdDialog(context);
+                },
+              icon: Icon(Icons.ads_click, color: Theme.of(context).primaryColor,))
+        ],
       ),
       body: Center(
               child: Stack(
@@ -194,7 +314,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.9,
-                        child: _isLoading
+                        child: firebaseUserDataProvider.getUserData['userFirstName']==null
                             ? Center(
                           child: Text(
                             'Loading.....',
@@ -272,7 +392,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           ElevatedButton(
                             onPressed: () {
                               if(firebaseUserDataProvider.getUserData['coins'] <= 0){
-                                showAdDialog(context);
+                                // showAdDialog(context);
+                                showRewardedAd(context);
                                 return;
                               }
                               showDifficultyDialog(context).then((selectedDifficulty) async{
@@ -280,7 +401,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   setState(() {
                                     _isRoomLoading = true;
                                   });
-                                  await firebaseRoomManagementProvider.fetchRoomDetailsOnFirebase(selectedDifficulty);
+                                  await firebaseRoomManagementProvider.joinOrCreateRoomTesting(selectedDifficulty);
                                   String rId = firebaseRoomManagementProvider.getRoomDetails['roomId'];
                                   while(true){
                                     if(rId!=''){
@@ -306,7 +427,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ElevatedButton(
                             onPressed: () {
                               if(firebaseUserDataProvider.getUserData['coins'] <= 0){
-                                showAdDialog(context);
+                                showRewardedAd(context);
                                 return;
                               }
                               showDifficultyDialog(context).then((selectedDifficulty) {
@@ -325,8 +446,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                         ],
-                      )
-
+                      ),
                     ],
                   ),
                   if (_isRoomLoading) // Show the loading box if _isRoomLoading is true
@@ -352,13 +472,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 ]
               ),
             ),
-            bottomNavigationBar: Container(
-              height: MediaQuery.of(context).size.height*0.08,
-              color: Theme.of(context).primaryColor,
-              child: Center(
-                child: Text(''),
-              ),
-            ),
+
+      // To Show Ads
+      bottomNavigationBar: SizedBox(
+        height: bannerAd.size.height.toDouble(),
+        width: bannerAd.size.width.toDouble(),
+        child: AdWidget(ad: bannerAd),
+      ),
+
+      // bottomNavigationBar: Container(
+      //         height: MediaQuery.of(context).size.height*0.08,
+      //         color: Theme.of(context).primaryColor,
+      //         child: Center(
+      //           child: Text(''),
+      //         ),
+      //       ),
     );
   }
 }

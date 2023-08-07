@@ -36,7 +36,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
   StreamController<int> _counterController = StreamController<int>();
   int _counter = 3;
 
-  bool hideBackButton = true;
+  // bool hideBackButton = false;
   String difficulty = "";
   // bool _isLoading = true;
   // bool _isInActiveUserTable = true;
@@ -614,11 +614,11 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
 
     final firebaseGamePoolProvider = Provider.of<FirebaseGamePoolProvider>(context, listen: false);
     final firebaseUserDataProvider = Provider.of<FirebaseUserDataProvider>(context, listen: false);
-    final firebaseRoomManagementProvider = Provider.of<FirebaseRoomManagementProvider>(context, listen: false);
+    final firebaseRoomManagementProvider = Provider.of<FirebaseRoomManagementProvider>(context, listen: true);
 
     return Scaffold(
         appBar: AppBar(
-              automaticallyImplyLeading: hideBackButton, // Hide the back button based on the hideBackButton variable
+              automaticallyImplyLeading: firebaseRoomManagementProvider.getBackButtonActive, // Hide the back button based on the hideBackButton variable
               backgroundColor: Theme.of(context).primaryColor,
               title: const Text('Sudoku Mingle')
             ),
@@ -636,7 +636,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
 
             if (snapshot.connectionState == ConnectionState.waiting) {
               // Show loading indicator while waiting for data
-              return CircularProgressIndicator();
+              return CircularProgressIndicator(color: Theme.of(context).primaryColor,);
             }
 
             if (snapshot.hasData && snapshot.data!.exists) {
@@ -644,6 +644,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
               var data = snapshot.data!.data() as Map<String, dynamic>;
               // Update your UI with the new data
               if(data['playerSize']==2) {
+                firebaseRoomManagementProvider.setBackButtonFalse();
                 if (data['createdBy'] == currentUser!.uid && data['isFirst']) {
                   initGameRoom(context, widget.roomId);
                   return GameSearchWidget(difficultyLevel: widget.difficultyLevel);
@@ -689,6 +690,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                               }
                               return const Text('Calculating Results');
                             }
+                            firebaseRoomManagementProvider.setBackButtonTrue();
                             return DualPlayerSudokuGridWidget(
                               generatedSudoku: {
                                 'correctSudoku': firebaseGamePoolProvider.getCorrectSudoku,
@@ -721,7 +723,8 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
 
             else {
               // Document does not exist
-              return Text('Document not found');
+              String wId = firebaseRoomManagementProvider.getWinnerId;
+              return WinnerAnnouncement(winnerId: wId, currentUserId: currentUser!.uid);
             }
           },
         ),
@@ -738,86 +741,17 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
       ),
     );
 
-    // return Scaffold(
-    //   appBar: AppBar(
-    //       automaticallyImplyLeading: hideBackButton, // Hide the back button based on the hideBackButton variable
-    //       backgroundColor: Theme.of(context).primaryColor,
-    //       title: _isInActiveUserTable
-    //           ? _isSeaching
-    //               ? const Text(
-    //                   'Searching Player'
-    //               )
-    //               : const Text(
-    //                  'Match Found'
-    //               )
-    //           : _isGameStarted
-    //               ? const Text('Playing')
-    //               : const Text( 'Puzzle Loading')
-    //     ),
-    //   body:  _isGameOver
-    //       ? const Center(child: Text('Game is over now'))
-    //       : _isInActiveUserTable
-    //       ? Center(
-    //         child: Column(
-    //           mainAxisAlignment: MainAxisAlignment.center,
-    //           crossAxisAlignment: CrossAxisAlignment.center,
-    //           children: [
-    //             Text(
-    //                 'Selected difficulty Level ${DifficultyEnumToString(widget.difficultyLevel).name}',
-    //               style: TextStyle(
-    //                 color: Theme.of(context).primaryColor,
-    //                 fontWeight: FontWeight.bold,
-    //                 fontSize: 20
-    //               ),
-    //             ),
-    //             const SizedBox(height: 20,),
-    //             _isSeaching
-    //                 ? UserSearchingWidget(milliSecondsDelayTime: 100, searching: true,)
-    //                 : UserSearchingWidget(milliSecondsDelayTime: 3000, searching: true,),
-    //             const SizedBox(height: 20,),
-    //             LiveUserWidget(liveUserData: globalVarliveUsersCountByDifficulty,)
-    //           ],
-    //         ),
-    //       )
-    //       : _isGameStarted
-    //         ? _isLoading
-    //             ? Center(child: Text(_counter, style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor),),)
-    //             : DualPlayerSudokuGridWidget(
-    //                 generatedSudoku: {
-    //                   'correctSudoku': correctSudokuToPass,
-    //                     'toBeSolvedSudoku': toBeSolvedSudokuToPass,
-    //                     'difficulty': widget.difficultyLevel
-    //                 },
-    //                 isMultiplayer: true,
-    //                 activeGameId: gameId ?? '',
-    //                 activePuzzleId: puzzleId ?? '',
-    //                 isPlayer1: _isFirst!,
-    //               )
-    //            // : UserSearchingWidget(milliSecondsDelayTime: 100000000, searching: false, userAvatarIndex: 9,)
-    //         : Center(child:
-    //             Column(
-    //               mainAxisAlignment: MainAxisAlignment.center,
-    //               crossAxisAlignment: CrossAxisAlignment.center,
-    //             children: [
-    //               Text(
-    //                 'Selected difficulty Level ${DifficultyEnumToString(widget.difficultyLevel).name}',
-    //                 style: const TextStyle(
-    //                   //color: Theme.of(context).primaryColor,
-    //                     fontSize: 20
-    //                 ),
-    //               ),
-    //               const SizedBox(height: 20,),
-    //               UserSearchingWidget(milliSecondsDelayTime: 100000000, searching: false, userAvatarIndex: 9,),
-    //             ],
-    //           )
-    //       )
-    // );
   }
 
 
   void deleteFromActiveGamePool() async{
 
     //get Game ID and delete that First
+    final roomData = FirebaseFirestore.instance
+        .collection(Constants.ACTIVE_USER_POOL)
+        .doc(DifficultyEnumToString(widget.difficultyLevel).name)
+        .collection(Constants.ACTIVE_ROOM)
+        .doc(widget.roomId).get();
 
     try {
       await FirebaseFirestore.instance
@@ -834,50 +768,8 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
       print('Error deleting document with roomId ${widget.roomId} : $e');
     }
 
-    // try{
-    //   FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_GAME_POOL, gameId!);
-    // }catch(e){
-    //   print('All ready deleted from ACTIVE_GAME_POOL');
-    // }
-    // try{
-    //   FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_PUZZLE_POOL, puzzleId!);
-    // }catch(e){
-    //   print('All ready deleted from ACTIVE_PUZZLE_POOL');
-    // }
-    // try{
-    //   FirebaseGlobalMethodUtil.deleteDocument(Constants.ACTIVE_USER_POOL, currentUser!.uid);
-    // }catch(e){
-    //   print('All ready deleted from ACTIVE_USER_POOL');
-    // }
 
   }
 
-  // Widget searchingWidget(){
-  //   return Column(
-  //       mainAxisSize: MainAxisSize.min,
-  //       mainAxisAlignment: MainAxisAlignment.center,
-  //       children: [
-  //       Text(
-  //         'Selected difficulty Level ${DifficultyEnumToString(widget.difficultyLevel).name}',
-  //         style: TextStyle(
-  //             color: Theme.of(context).primaryColor,
-  //             fontWeight: FontWeight.bold,
-  //             fontSize: 20
-  //         ),
-  //       ),
-  //       const SizedBox(height: 20,),
-  //       UserSearchingWidget(milliSecondsDelayTime: 100, searching: true,),
-  //       const SizedBox(height: 20,),
-  //       Text(
-  //         'Searching Player',
-  //         style: TextStyle(
-  //             color: Theme.of(context).primaryColor,
-  //             fontWeight: FontWeight.bold,
-  //             fontSize: 16
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
 
 }

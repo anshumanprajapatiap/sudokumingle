@@ -10,6 +10,8 @@ import '../utils/globalMethodUtil.dart';
 class FirebaseRoomManagementProvider with ChangeNotifier {
   final _currentAuthUser = FirebaseAuth.instance.currentUser;
   String _winnerId = '';
+  bool _backButtonShow = true;
+
   Map<String, dynamic> _roomDetailsOnActivePool = {
     'roomId': '',
     'playerId1': '',
@@ -28,66 +30,145 @@ class FirebaseRoomManagementProvider with ChangeNotifier {
     return _roomDetailsOnActivePool;
   }
 
+  bool get getBackButtonActive => _backButtonShow;
   String get getWinnerId => _winnerId;
 
-  fetchRoomDetailsOnFirebase(Difficulty difficulty) async{
+  void setBackButtonTrue(){
+    _backButtonShow = true;
+    notifyListeners();
+  }
+
+  void setBackButtonFalse(){
+    _backButtonShow = false;
+    notifyListeners();
+  }
+
+  Future<void> joinOrCreateRoomTesting(Difficulty difficulty) async {
     _roomDetailsOnActivePool['roomId']= '';
 
-    CollectionReference activeRoomInPoolCollection = FirebaseFirestore.instance
+    CollectionReference activeRoomsCollection = FirebaseFirestore.instance
         .collection(Constants.ACTIVE_USER_POOL)
-        .doc(difficulty!.name).collection(Constants.ACTIVE_ROOM);
-    QuerySnapshot snapshot = await activeRoomInPoolCollection.get();
-    List<QueryDocumentSnapshot> documents = snapshot.docs.toList();
-    print(documents);
-    // await Future.delayed(Duration(seconds: 2), () {print('delayName');});
+        .doc(difficulty!.name)
+        .collection(Constants.ACTIVE_ROOM);
+    // CollectionReference activeRoomsCollection = FirebaseFirestore.instance.collection('ActiveRoom');
 
-    if(documents.length==0){
-      print('No Rooms are at ACTIVE_ROOM Collection');
-      await createRoomOnActiveDetailsOnFirebase(difficulty);
-      return;
-    }
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        QuerySnapshot snapshot = await activeRoomsCollection.get();
+        List<QueryDocumentSnapshot> rooms = snapshot.docs.toList();
 
-    for (QueryDocumentSnapshot document in documents) {
-      Map<String, dynamic>? documentData = document.data() as Map<String, dynamic>?;
-      if (documentData != null && documentData['playerSize']==1) {
-        String roomId = documentData['roomId'] as String? ?? '';
-        String playerId1 = documentData['playerId1'] as String ?? '';
-        String username1 = documentData['username1'] as String ?? '';
-        String createdBy = documentData['createdBy'] as String ?? '';
-        Timestamp createdAt = documentData['createdAt'] ?? '';
+        if(rooms.isEmpty){
+          print('No Rooms are at ACTIVE_ROOM Collection');
+          await createRoomOnActiveDetailsOnFirebase(difficulty);
+          return;
+        }
 
-        Map<String, dynamic> updatePlayer2Data = {
-          'playerId2': _currentAuthUser!.uid,
-          'username2':_currentAuthUser!.displayName,
-          'playerSize': 2,
-          'joinedAt': Timestamp.now(),
-        };
-        activeRoomInPoolCollection.doc(roomId).update(updatePlayer2Data);
+        // Check for an available room
+        for (QueryDocumentSnapshot room in rooms) {
+          Map<String, dynamic> roomData = room.data() as Map<String, dynamic>;
+          int playerSize = roomData['playerSize'];
 
-        Map<String, dynamic> gameRoomData = {
-          'roomId': roomId,
-          'playerId1': playerId1,
-          'playerId2': _currentAuthUser!.uid,
-          'username1': username1,
-          'username2': _currentAuthUser!.displayName,
-          'difficultyLevel': difficulty!.name,
-          'createdBy': createdBy,
-          'playerSize': 2,
-          'createdAt': createdAt,
-          'joinedAt': Timestamp.now(),
-          'gameId': '',
-        };
-        _roomDetailsOnActivePool['roomId'] = gameRoomData['roomId'];
-        _roomDetailsOnActivePool['createdBy'] = gameRoomData['createdBy'];
-        // _roomDetailsOnActivePool = gameRoomData;
-        notifyListeners();
-        print('Room ID is Full Now $roomId');
+          if (playerSize == 1 && roomData['isAvailable']) {
+            // Mark the room as occupied by Player 2 and update player count
+            DocumentReference roomRef = room.reference;
+
+            // Use a transaction to ensure atomic updates
+            DocumentSnapshot roomSnapshot = await transaction.get(roomRef);
+            Map<String, dynamic> roomSnapshotData = roomSnapshot.data() as Map<String, dynamic>;
+            int currentSize = roomSnapshotData['playerSize'];
+            bool currentAvailable = roomData['isAvailable'];
+            String player1Id = roomData['playerId1'];
+            if (currentSize == 1 && currentAvailable && player1Id !=_currentAuthUser!.uid) {
+              // Mark the room as occupied by Player 2 and update player count
+              transaction.update(roomRef, {
+                'playerSize': 2,
+                'playerId2': _currentAuthUser!.uid,
+                'username2': _currentAuthUser!.displayName,
+                'joinedAt': Timestamp.now(),
+                'isAvailable': false
+              });
+
+              _roomDetailsOnActivePool['roomId'] = roomSnapshotData['roomId'];
+              _roomDetailsOnActivePool['createdBy'] = roomSnapshotData['createdBy'];
+              return;
+            }
+          }
+        }
+
+        // If no available room was found, create a new room and try joining again
+        await createRoomOnActiveDetailsOnFirebase(difficulty);
         return;
-      }
-    }
 
-    await createRoomOnActiveDetailsOnFirebase(difficulty);
+        // Retry joining the new room
+        // You could implement a recursive call or a separate function to handle this retry logic
+      });
+    } catch (e) {
+      // Handle transaction error and retries
+      // await createRoomOnActiveDetailsOnFirebase(difficulty);
+    }
   }
+
+
+  // fetchRoomDetailsOnFirebase(Difficulty difficulty) async{
+  //   _roomDetailsOnActivePool['roomId']= '';
+  //
+  //   CollectionReference activeRoomInPoolCollection = FirebaseFirestore.instance
+  //       .collection(Constants.ACTIVE_USER_POOL)
+  //       .doc(difficulty!.name)
+  //       .collection(Constants.ACTIVE_ROOM);
+  //
+  //   QuerySnapshot snapshot = await activeRoomInPoolCollection.get();
+  //   List<QueryDocumentSnapshot> documents = snapshot.docs.toList();
+  //   print(documents);
+  //   // await Future.delayed(Duration(seconds: 2), () {print('delayName');});
+  //
+  //   if(documents.length==0){
+  //     print('No Rooms are at ACTIVE_ROOM Collection');
+  //     await createRoomOnActiveDetailsOnFirebase(difficulty);
+  //     return;
+  //   }
+  //
+  //   for (QueryDocumentSnapshot document in documents) {
+  //     Map<String, dynamic>? documentData = document.data() as Map<String, dynamic>?;
+  //     if (documentData != null && documentData['playerSize']==1) {
+  //       String roomId = documentData['roomId'] as String? ?? '';
+  //       String playerId1 = documentData['playerId1'] as String ?? '';
+  //       String username1 = documentData['username1'] as String ?? '';
+  //       String createdBy = documentData['createdBy'] as String ?? '';
+  //       Timestamp createdAt = documentData['createdAt'] ?? '';
+  //
+  //       Map<String, dynamic> updatePlayer2Data = {
+  //         'playerId2': _currentAuthUser!.uid,
+  //         'username2':_currentAuthUser!.displayName,
+  //         //'playerSize': documentData['playerSize']+1,
+  //         'joinedAt': Timestamp.now(),
+  //       };
+  //       activeRoomInPoolCollection.doc(roomId).update(updatePlayer2Data);
+  //
+  //       Map<String, dynamic> gameRoomData = {
+  //         'roomId': roomId,
+  //         'playerId1': playerId1,
+  //         'playerId2': _currentAuthUser!.uid,
+  //         'username1': username1,
+  //         'username2': _currentAuthUser!.displayName,
+  //         'difficultyLevel': difficulty!.name,
+  //         'createdBy': createdBy,
+  //         'playerSize': 2,
+  //         'createdAt': createdAt,
+  //         'joinedAt': Timestamp.now(),
+  //         'gameId': '',
+  //       };
+  //       _roomDetailsOnActivePool['roomId'] = gameRoomData['roomId'];
+  //       _roomDetailsOnActivePool['createdBy'] = gameRoomData['createdBy'];
+  //       // _roomDetailsOnActivePool = gameRoomData;
+  //       notifyListeners();
+  //       print('Room ID is Full Now $roomId');
+  //       return;
+  //     }
+  //   }
+  //
+  //   await createRoomOnActiveDetailsOnFirebase(difficulty);
+  // }
 
   createRoomOnActiveDetailsOnFirebase(Difficulty difficulty) async {
 
@@ -113,7 +194,8 @@ class FirebaseRoomManagementProvider with ChangeNotifier {
       'createdAt': Timestamp.now(),
       'joinedAt': '',
       'gameId': '',
-      'isFirst': true
+      'isFirst': true,
+      'isAvailable': true,
     };
     await userDocument.set(gameRoomData, SetOptions(merge: true),);
 

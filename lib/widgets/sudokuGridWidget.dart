@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:sudokumingle/model/gameHistoryModel.dart';
 import 'package:sudokumingle/providers/darkThemeProvider.dart';
@@ -14,6 +15,7 @@ import 'package:sudokumingle/utils/constants.dart';
 
 import '../main.dart';
 import '../providers/firebaseUserDataProvider.dart';
+import '../utils/adMobUtility.dart';
 import '../utils/globalMethodUtil.dart';
 
 class SudokuGridWidget extends StatefulWidget {
@@ -47,6 +49,38 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   //   final player=AudioCache();
   //   player.play('audio/alert_sound.mp3');
   // }
+
+
+  AdMobUtility adMobUtility = AdMobUtility();
+  late InterstitialAd interstitialAd;
+  late BannerAd pauseBox;
+  late BannerAd gameOver;
+  late BannerAd mistakes;
+
+  initBannerAd(){
+    pauseBox = adMobUtility.largeBannerAd();
+    pauseBox.load();
+    gameOver = adMobUtility.largeBannerAd();
+    gameOver.load();
+    mistakes = adMobUtility.largeBannerAd();
+    mistakes.load();
+  }
+
+  void initGameEndAd(){
+
+    InterstitialAd.load(
+      adUnitId: adMobUtility.developmentCoinWinAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad){
+          interstitialAd = ad;
+        },
+        onAdFailedToLoad: ((error) {
+          interstitialAd.dispose();
+        }),
+      ),
+    );
+  }
 
   int countEmptyCells() {
     int emptyCellCount = 0;
@@ -169,6 +203,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     });
   }
 
+
+
   @override
   void initState() {
     super.initState();
@@ -185,6 +221,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     // setState(() {
     //   _isLoading = false;
     // });
+    initGameEndAd();
+    initBannerAd();
   }
 
   @override
@@ -315,44 +353,92 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     }
   }
 
+  Dialog buildMaxMistakesDialog() {
+    return Dialog(
+      insetAnimationCurve: Curves.bounceOut,
+      insetAnimationDuration: const Duration(milliseconds: 100),
+      backgroundColor: Theme.of(context).secondaryHeaderColor, // Set your desired background color here
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20,),
+            Text(
+              'Maximum Mistakes Reached',
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor
+              ),
+            ),
+            const SizedBox(height: 20,),
+            Text(
+              'You have made 3 mistakes. Do you want to restart the game or go back?',
+              style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor
+              ),
+            ),
 
-  AlertDialog buildMaxMistakesDialog() {
-    return AlertDialog(
-      title: Text('Maximum Mistakes Reached'),
-      content: Text('You have made 3 mistakes. Do you want to restart the game or go back?'),
-      actions: [
-        Center(
-          child: Row(
-            children: [
-                    TextButton(
-                      onPressed: () {
-                        // Restart game
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => PraticeOfflineSudokuScreen(difficultyLevel: difficultyLevel as Difficulty,))
-                        );
-                      },
-                      child: Text('Restart'),
+            const SizedBox(height: 20,),
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.3,
+              width: mistakes.size.width.toDouble(),
+              child: AdWidget(ad: mistakes),
+            ),
+            const SizedBox(height: 20,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    // Restart game
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => PraticeOfflineSudokuScreen(difficultyLevel: difficultyLevel as Difficulty,))
+                    );
+                  },
+                  child: Text(''
+                      'Restart',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor
                     ),
-                    TextButton(
-                      onPressed: () {
-                        // Go back
-                        Navigator.pop(context);
-                        Navigator.pop(context);
-                      },
-                      child: Text('Go Back'),
-                    ),
-                  ],
-          ),
-        )
-      ],
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Go back
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    'Go Back',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor
+                    ),),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20,),
+          ],
+        ),
+      ),
     );
   }
 
   void showGameOverDialog(BuildContext context) {
-    final double dialogHeight = MediaQuery.of(context).size.height * 0.8;
-
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -364,105 +450,158 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                 // Prevent dialog from closing on back press
                 return false;
               },
-              child: AlertDialog(
-                title: Text('Game Over',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold
-                  ),
+              child: Dialog(
+                insetAnimationCurve: Curves.bounceOut,
+                insetAnimationDuration: const Duration(milliseconds: 100),
+                backgroundColor: Theme.of(context).secondaryHeaderColor, // Set your desired background color here
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
-                content: Container(
-                  height: dialogHeight * 0.5,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Column(
-                            children: [
-                              Text('Mistakes',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text('$numberOfMistakes/3',
-
-                              ),
-                            ],
-                          ),
-                          SizedBox(width: 20),
-                          Column(
-                            children: [
-                              Text('Time',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text('${_formatElapsedTime(elapsedTime)}',
-
-                              ),
-                            ],
-                          ),
-                          SizedBox(width: 20),
-                          Column(
-                            children: [
-                              Text('Difficulty',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text('${difficultyLevel?.name}',
-
-                              ),
-                            ],
-                          ),
-                        ],
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(height: 20,),
+                    Text('Game Over',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                        fontSize: 30
                       ),
-                      // Image of 150x150
-                      SizedBox(height: 20,),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        height: MediaQuery.of(context).size.width * 0.7,
-                        child: Container(
-                          color: Theme.of(context).primaryColor,
+                    ),
+                    numberOfEmptyCell == 0
+                        ? Text('You Won',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).primaryColor,
+                                fontSize: 15
+                            ),
+                          )
+                        :  Text('You Lose',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).primaryColor,
+                                fontSize: 15
+                            ),
+                          ),
+
+                    SizedBox(height: 20,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          children: [
+                            Text('Mistakes',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 15
+                              ),
+                            ),
+                            Text('$numberOfMistakes/3',
+                              style: TextStyle(
+                                  color: numberOfMistakes>=1
+                                      ? Colors.redAccent
+                                      : Theme.of(context).primaryColor,
+                                  fontSize: 15
+                              ),
+                            ),
+                          ],
                         ),
-                      )
-                    ],
-                  ),
+                        const SizedBox(width: 20),
+                        Column(
+                          children: [
+                            Text('Time',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 15
+                              ),
+                            ),
+                            Text('${_formatElapsedTime(elapsedTime)}',
+                              style: TextStyle(
+
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 15
+                              ),
+
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 20),
+                        Column(
+                          children: [
+                            Text('Difficulty',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 15
+                              ),
+                            ),
+                            Text('${difficultyLevel?.name}',
+                              style: TextStyle(
+
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 15
+                              ),
+
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    // Image of 150x150
+                    SizedBox(height: 20,),
+
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.3,
+                      width: mistakes.size.width.toDouble(),
+                      child: AdWidget(ad: mistakes),
+                    ),
+
+                    SizedBox(height: 20,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            // Resume game
+                            saveGameToUserHistory();
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          },
+                          child: Text('Exit',
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)
+                          ),
+                          onPressed: () {
+                            // Resume game
+                            saveGameToUserHistory();
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (_) => PraticeOfflineSudokuScreen(difficultyLevel: difficultyLevel as Difficulty,))
+                            );
+                          },
+                          child: Text('Play Again',
+                            style: TextStyle(
+                                color: Theme.of(context).secondaryHeaderColor
+                            ),
+                          ),
+                        ),
+
+                      ],
+                    ),
+                    SizedBox(height: 20,),
+                  ],
                 ),
-                actions: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          // Resume game
-                          saveGameToUserHistory();
-                          Navigator.pop(context);
-                          Navigator.pop(context);
-                        },
-                        child: Text('Exit'),
-                      ),
-                      ElevatedButton(
-                        style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)
-                        ),
-                        onPressed: () {
-                          // Resume game
-                          saveGameToUserHistory();
-                          Navigator.pop(context);
-                          Navigator.pop(context);
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (_) => PraticeOfflineSudokuScreen(difficultyLevel: difficultyLevel as Difficulty,))
-                          );
-                        },
-                        child: Text('Play Again'),
-                      ),
-
-                    ],
-                  ),
-                ],
               ),
             );
           },
@@ -485,102 +624,147 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                 // Prevent dialog from closing on back press
                 return false;
               },
-              child: AlertDialog(
-                title: Text('Paused',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold
-                  ),
+              child: Dialog(
+                insetAnimationCurve: Curves.bounceOut,
+                insetAnimationDuration: const Duration(milliseconds: 100),
+                backgroundColor: Theme.of(context).secondaryHeaderColor, // Set your desired background color here
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
                 ),
-                content: Container(
-                  height: dialogHeight * 0.5,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Column(
-                            children: [
-                              Text('Mistakes',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text('$numberOfMistakes/3',
-
-                              ),
-                            ],
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 30),
+                        Text('Paused',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 28
                           ),
-                          SizedBox(width: 20),
-                          Column(
-                            children: [
-                              Text('Time',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text('${_formatElapsedTime(elapsedTime)}',
-
-                              ),
-                            ],
-                          ),
-                          SizedBox(width: 20),
-                          Column(
-                            children: [
-                              Text('Difficulty',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold
-                                ),
-                              ),
-                              Text('${difficultyLevel?.name}',
-
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      // Image of 150x150
-                      SizedBox(height: 20,),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        height: MediaQuery.of(context).size.width * 0.7,
-                        child: Container(
-                          color: Theme.of(context).primaryColor,
                         ),
-                      )
-                    ],
-                  ),
+                        const SizedBox(height: 30),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Column(
+                              children: [
+                                Text('Mistakes',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 15
+                                  ),
+                                ),
+                                Text('$numberOfMistakes/3',
+                                  style: TextStyle(
+
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 15
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 20),
+                            Column(
+                              children: [
+                                 Text('Time',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 15
+                                  ),
+                                ),
+                                Text('${_formatElapsedTime(elapsedTime)}',
+                                  style: TextStyle(
+
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 15
+                                  ),
+
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 20),
+                            Column(
+                              children: [
+                                 Text('Difficulty',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 15
+                                  ),
+                                ),
+                                Text('${difficultyLevel?.name}',
+                                  style: TextStyle(
+
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 15
+                                  ),
+
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        // Image of 150x150
+                        const SizedBox(height: 20,),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.3,
+                          width: pauseBox.size.width.toDouble(),
+                          child: AdWidget(ad: pauseBox),
+                        ),
+                        // SizedBox(
+                        //   width: MediaQuery.of(context).size.width * 0.8,
+                        //   height: MediaQuery.of(context).size.height * 0.3,
+                        //   child: Container(
+                        //     color: Theme.of(context).primaryColor,
+                        //   ),
+                        // )
+                      ],
+                    ),
+                    const SizedBox(height: 20,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            // Resume game
+                            saveGameToUserHistory();
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                            // Navigator.pop(context);
+                            interstitialAd.show();
+                          },
+                          child: Text('Exit',
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor
+                              )
+                          ),
+                        ),
+                        ElevatedButton(
+                          style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)
+                          ),
+                          onPressed: () {
+                            // Resume game
+                            Navigator.pop(context);
+                            resumeTimer();
+                          },
+                          child: Text('Resume', style: TextStyle(
+                            color: Theme.of(context).secondaryHeaderColor
+                          ),),
+                        ),
+
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+                  ],
                 ),
-                actions: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          // Resume game
-                          saveGameToUserHistory();
-                          Navigator.pop(context);
-                          Navigator.pop(context);
-                          // Navigator.pop(context);
-                        },
-                        child: Text('Exit'),
-                      ),
-                      ElevatedButton(
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)
-                        ),
-                        onPressed: () {
-                          // Resume game
-                          Navigator.pop(context);
-                          resumeTimer();
-                        },
-                        child: Text('Resume'),
-                      ),
-
-                    ],
-                  ),
-                ],
               ),
             );
           },
@@ -694,7 +878,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
                     itemCount: 81,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 9,
                     ),
                     itemBuilder: (context, index) {
@@ -747,10 +931,22 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                             Container(
                               decoration: BoxDecoration(
                                 border: Border(
-                                  right: BorderSide(color: columnNumberEight ? borderColor: Colors.grey.withOpacity(0.2)),
-                                  left: BorderSide(color: isBoldCellColumn ? borderColor : Colors.grey.withOpacity(0.0)),
-                                  bottom: BorderSide(color: rowNumberEight ? borderColor : Colors.grey.withOpacity(0.2)),
-                                  top: BorderSide(color: isBoldCellRow ? borderColor : Colors.grey.withOpacity(0.0)),
+                                  right: BorderSide(
+                                      color: columnNumberEight ? borderColor: Colors.grey.withOpacity(0.2),
+                                    width: 2
+                                  ),
+                                  left: BorderSide(
+                                      color: isBoldCellColumn ? borderColor : Colors.grey.withOpacity(0.0),
+                                      width: 2
+                                  ),
+                                  bottom: BorderSide(
+                                      color: rowNumberEight ? borderColor : Colors.grey.withOpacity(0.2),
+                                      width: 2
+                                  ),
+                                  top: BorderSide(
+                                      color: isBoldCellRow ? borderColor : Colors.grey.withOpacity(0.0),
+                                      width: 2
+                                  ),
 
                                 ),
                                 color: cellColor,
@@ -761,7 +957,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                                   cellValue != null ? cellValue.toString() : '',
                                   style: TextStyle(
                                       color: themeProvider.isDarkMode ? Colors.white : Colors.blueGrey ,
-                                      fontSize: 20
+                                      fontSize: 23
                                   ),
                                 ),
                               ),
@@ -785,7 +981,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                   ),
                 ),
 
-                Padding(
+                const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -873,10 +1069,11 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+
+                const SizedBox(height: 20),
 
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10.0),
+                  padding: EdgeInsets.symmetric(horizontal: 2.0, vertical: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: List.generate(9, (index) {
@@ -886,8 +1083,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                           fillCellWithNumber(number);
                         },
                         child: Container(
-                          width: 36,
-                          height: 36,
+                          width: MediaQuery.sizeOf(context).width/11,
+                          height: 35,
                           decoration: BoxDecoration(
                             color: Theme.of(context).primaryColor,
                             borderRadius: BorderRadius.circular(8.0),
@@ -895,10 +1092,10 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                           child: Center(
                             child: Text(
                               number.toString(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                   // color: Theme.of(context).secondaryHeaderColor,
                                   color: Colors.white,
-                                  fontSize: 20, fontWeight: FontWeight.bold),
+                                  fontSize: 23, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -906,20 +1103,21 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                     }),
                   ),
                 ),
-                SizedBox(height: 20),
+
+                const SizedBox(height: 20),
 
               ],
             ),
 
-            bottomNavigationBar: SizedBox(
-              height: MediaQuery.of(context).size.height*0.1,
-              child: Container(
-                color: Theme.of(context).primaryColor,
-                child: Center(
-                    child: Text('')
-                ),
-              ),
-            ),
+            // bottomNavigationBar: SizedBox(
+            //   height: MediaQuery.of(context).size.height*0.1,
+            //   child: Container(
+            //     color: Theme.of(context).primaryColor,
+            //     child: Center(
+            //         child: Text('')
+            //     ),
+            //   ),
+            // ),
           ),
     );
   }

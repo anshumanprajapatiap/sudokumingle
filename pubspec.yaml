@@ -52,6 +52,9 @@ dependencies:
   cloud_firestore: ^4.7.0
   google_sign_in: ^6.1.0
 
+  #admob
+  google_mobile_ads: ^3.0.0
+
   uuid: ^3.0.6
 
   audioplayers: ^0.20.1
@@ -78,7 +81,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/logo/sudoku-mingle-3.png"
+  image_path: "assets/images/logo/launchIcon/1024.png"
 
 # The following section is specific to Flutter packages.
 flutter:

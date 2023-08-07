@@ -176,7 +176,6 @@ class FirebaseUserDataProvider with ChangeNotifier {
     DocumentReference documentReference = FirebaseFirestore.instance
         .collection(Constants.CUSTOM_USER_PROFILE)
         .doc(_currentAuthUser!.uid);
-
     _userData['coins'] += coin;
     await documentReference.update({
       'mingleCoins': _userData['coins']
@@ -541,6 +540,7 @@ class FirebaseUserDataProvider with ChangeNotifier {
     Duration timeDifference = endedAt.difference(createdAt);
 
     if(isMultiplayer) {
+      int score = singleData['player1Id'] == _currentAuthUser!.uid ? singleData['player1Points'] : singleData['player2Points'] ;
       _onlineGameHistory[difficultyLevel]['won'] += singleData['winnerId'] == _currentAuthUser!.uid ? 1 : 0;
       if(_onlineGameHistory[difficultyLevel]['bestTime'] == ''){
         _onlineGameHistory[difficultyLevel]['bestTime'] = timeDifference;
@@ -558,11 +558,11 @@ class FirebaseUserDataProvider with ChangeNotifier {
         }
       }
 
-      if(_onlineGameHistory[difficultyLevel]['bestScore'] < singleData['score']){
-        print('${_onlineGameHistory[difficultyLevel]['bestScore']} ->  ${singleData['score']}');
-        _onlineGameHistory[difficultyLevel]['bestScore'] = singleData['score'];
+      if(_onlineGameHistory[difficultyLevel]['bestScore'] < score){
+        print('${_onlineGameHistory[difficultyLevel]['bestScore']} ->  $score}');
+        _onlineGameHistory[difficultyLevel]['bestScore'] = score;
       }
-      _onlineGameHistory[difficultyLevel]['avgScore'] += singleData['score'];
+      _onlineGameHistory[difficultyLevel]['avgScore'] += score;
       _onlineGameHistory[difficultyLevel]['totalGames']++;
       // _onlineGameHistory[difficultyLevel]['winningPercentage'] = (_onlineGameHistory[difficultyLevel]['won'] / _onlineGameHistory[difficultyLevel]['totalGames']) * 100;
     }

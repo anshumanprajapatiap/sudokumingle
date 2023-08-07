@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:sudokumingle/providers/firebaseUserDataProvider.dart';
 import 'package:sudokumingle/screens/settingScreen.dart';
 
+import '../utils/adMobUtility.dart';
 import '../widgets/darkLightModeWidget.dart';
 import '../widgets/logoutWidget.dart';
 import 'aboutScreen.dart';
@@ -16,7 +18,23 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final lineHeight = 0.3;
+  AdMobUtility adMobUtility = AdMobUtility();
 
+  late BannerAd bannerAd;
+  late BannerAd upperProfileAd;
+  initBannerAd(){
+    bannerAd = adMobUtility.bottomBarAd();
+    bannerAd.load();
+    upperProfileAd = adMobUtility.largeBannerAd();
+    upperProfileAd.load();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    initBannerAd();
+  }
 
   void _showClearContentDialog(BuildContext context) {
     final userDataProvider = Provider.of<FirebaseUserDataProvider>(context, listen: false);
@@ -151,9 +169,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       body: ListView(
         children: [
-          Container(
+          SizedBox(
             height: 200,
-            color: Theme.of(context).primaryColor// Replace with your profile section content
+            width: upperProfileAd.size.width.toDouble(),
+            child: AdWidget(ad: upperProfileAd),
           ),
           const SizedBox(height: 30,),
           Container(
@@ -296,6 +315,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // LogoutWidget()
           // Add more ListTile widgets for additional items
         ],
+      ),
+
+      // To Show Ads
+      bottomNavigationBar: SizedBox(
+        height: bannerAd.size.height.toDouble(),
+        width: bannerAd.size.width.toDouble(),
+        child: AdWidget(ad: bannerAd),
       ),
     );
   }

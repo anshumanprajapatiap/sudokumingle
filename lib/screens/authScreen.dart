@@ -1,10 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 
 import '../main.dart';
 import '../providers/googleSignInProvider.dart';
+import '../utils/adMobUtility.dart';
 import '../widgets/singInWidget.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -17,9 +20,26 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
+  AdMobUtility adMobUtility = AdMobUtility();
+
+  late BannerAd upperProfileAd;
+  initBannerAd(){
+    upperProfileAd = adMobUtility.largeBannerAd();
+    upperProfileAd.load();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    final googleSignInProvider = Provider.of<GoogleSignInProvider>(context, listen: false);
+    googleSignInProvider.setIsLoading(false);
+    initBannerAd();
+  }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -39,20 +59,32 @@ class _AuthScreenState extends State<AuthScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: MediaQuery.sizeOf(context).width*0.8,
-                height: MediaQuery.sizeOf(context).width*0.8,
-                color: Theme.of(context).primaryColor,
-                //adds
-                child: Center(child: Text('')),
-              ),
+
               SizedBox(
+                height: MediaQuery.sizeOf(context).width*0.8,
+                width: MediaQuery.sizeOf(context).width*0.8,
+                child: AdWidget(ad: upperProfileAd),
+              ),
+
+              // Container(
+              //
+              //   width: MediaQuery.sizeOf(context).width*0.8,
+              //   height: MediaQuery.sizeOf(context).width*0.8,
+              //   color: Theme.of(context).primaryColor,
+              //   //adds
+              //   child: const Center(child: Text('')),
+              // ),
+
+              const SizedBox(
                 height: 30,
               ),
-              const GoogleSignInWidget(),
+
+              GoogleSignInWidget(),
+
               SizedBox(
                 height: MediaQuery.sizeOf(context).height*0.1,
               ),
+
               SizedBox(
                 height: MediaQuery.sizeOf(context).height*0.1,
                 child: Text(
@@ -70,5 +102,4 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
       );
   }
-
 }

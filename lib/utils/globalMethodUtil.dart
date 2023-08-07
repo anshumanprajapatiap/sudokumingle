@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sudokumingle/utils/SudokuBoardEnums.dart';
 
 import '../providers/firebaseUserDataProvider.dart';
 import 'constants.dart';
@@ -140,6 +141,46 @@ class FirebaseGlobalMethodUtil{
     });
   }
 
+  // void deleteActiveGamePool(String gameId) async{
+  //
+  //   try{
+  //     await FirebaseFirestore.instance
+  //         .collection(Constants.ACTIVE_GAME_POOL)
+  //         .doc(gameId)
+  //         .delete();
+  //   }
+  //   catch(e){
+  //     print('Error deleting document with roomId ${gameId} : $e');
+  //   }
+  //
+  // }
+  // void deleteFromActiveGamePool(Difficulty difficultyLevel, String roomId, String gameId) async{
+  //
+  //   //get Game ID and delete that First
+  //   final roomData = FirebaseFirestore.instance
+  //       .collection(Constants.ACTIVE_USER_POOL)
+  //       .doc(DifficultyEnumToString(difficultyLevel).name)
+  //       .collection(Constants.ACTIVE_ROOM)
+  //       .doc(widget.roomId).get();
+  //
+  //   try {
+  //     await FirebaseFirestore.instance
+  //         .collection(Constants.ACTIVE_USER_POOL)
+  //         .doc(DifficultyEnumToString(widget.difficultyLevel).name)
+  //         .collection(Constants.ACTIVE_ROOM)
+  //         .doc(widget.roomId)
+  //         .delete().then((_) {
+  //       print('Document with roomId ${widget.roomId} deleted successfully.');
+  //     }).catchError((error) {
+  //       print('Error deleting document with roomId ${widget.roomId} : $error');
+  //     });
+  //   }catch(e){
+  //     print('Error deleting document with roomId ${widget.roomId} : $e');
+  //   }
+  //
+  //
+  // }
+
 }
 
 
@@ -243,6 +284,5 @@ class FirebaseGlobalMethodActiveGamePoolUtil{
 
     }
   }
-
 
 }

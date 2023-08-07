@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:sudokumingle/utils/SudokuBoardEnums.dart';
 import 'package:sudokumingle/utils/constants.dart';
 import '../providers/darkThemeProvider.dart';
+import '../providers/firebaseRoomManagementProvider.dart';
 import '../utils/globalMethodUtil.dart';
 
 class DualPlayerSudokuGridWidget extends StatefulWidget {
@@ -297,6 +298,8 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
     //     elapsedTime = stopwatch.elapsed;
     //   });
     // });
+    // final firebaseRoomManagementProvider = Provider.of<FirebaseRoomManagementProvider>(context, listen: false);
+    // firebaseRoomManagementProvider.setBackButtonTrue();
     WidgetsBinding.instance?.addObserver(this);
   }
 
@@ -423,10 +426,22 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                               Container(
                                 decoration: BoxDecoration(
                                   border: Border(
-                                    right: BorderSide(color: columnNumberEight ? borderColor: Colors.grey.withOpacity(0.2)),
-                                    left: BorderSide(color: isBoldCellColumn ? borderColor : Colors.grey.withOpacity(0.0)),
-                                    bottom: BorderSide(color: rowNumberEight ? borderColor : Colors.grey.withOpacity(0.2)),
-                                    top: BorderSide(color: isBoldCellRow ? borderColor : Colors.grey.withOpacity(0.0)),
+                                    right: BorderSide(
+                                        color: columnNumberEight ? borderColor: Colors.grey.withOpacity(0.2),
+                                        width: 2
+                                    ),
+                                    left: BorderSide(
+                                        color: isBoldCellColumn ? borderColor : Colors.grey.withOpacity(0.0),
+                                        width: 2
+                                    ),
+                                    bottom: BorderSide(
+                                        color: rowNumberEight ? borderColor : Colors.grey.withOpacity(0.2),
+                                        width: 2
+                                    ),
+                                    top: BorderSide(
+                                        color: isBoldCellRow ? borderColor : Colors.grey.withOpacity(0.0),
+                                        width: 2
+                                    ),
 
                                   ),
                                   color: cellColor,
@@ -436,7 +451,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                                   child: Text(
                                     cellValue != null ? cellValue.toString() : '',
                                     style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 23,
                                       color: themeProvider.isDarkMode ? Colors.white : Colors.blueGrey ,),
                                   ),
                                 ),
@@ -476,8 +491,8 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                             fillCellWithNumber(number);
                           },
                           child: Container(
-                            width: 36,
-                            height: 36,
+                            width: MediaQuery.sizeOf(context).width/11,
+                            height: 35,
                             decoration: BoxDecoration(
                               color: Theme.of(context).primaryColor,
                               borderRadius: BorderRadius.circular(8.0),
@@ -488,7 +503,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
                                 style: const TextStyle(
                                   // color: Theme.of(context).secondaryHeaderColor,
                                     color: Colors.white,
-                                    fontSize: 20, fontWeight:
+                                    fontSize: 23, fontWeight:
                                 FontWeight.bold
                                 ),
                               ),

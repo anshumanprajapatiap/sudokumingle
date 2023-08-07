@@ -1,11 +1,7 @@
-
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:sudokumingle/providers/firebaseUserDataProvider.dart';
 import 'package:sudokumingle/screens/authScreen.dart';
-import '../main.dart';
 import 'bottomNavigationBar.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -20,7 +16,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-
   @override
   Widget build(BuildContext context) {
     bool userDataPresent =  false;
@@ -31,7 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     Widget content = Container(
       color: Theme.of(context).primaryColor,
-      padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 0),
+      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 0),
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height,
       child: Center(
@@ -104,19 +99,17 @@ class _SplashScreenState extends State<SplashScreen> {
           duration: 300,
           splash: content,
           splashTransition: SplashTransition.fadeTransition,
-          //pageTransitionType: PageTransitionType.scale,
           splashIconSize: 600,
           backgroundColor: Theme.of(context).primaryColor,
-          nextScreen: TabsScreen(),
+          nextScreen: const TabsScreen(),
         )
         : AnimatedSplashScreen(
           duration: 300,
           splash: content,
           splashTransition: SplashTransition.fadeTransition,
-          //pageTransitionType: PageTransitionType.scale,
           splashIconSize: 600,
           backgroundColor: Theme.of(context).primaryColor,
-          nextScreen: AuthScreen(),
+          nextScreen: const AuthScreen(),
          );
   }
 }

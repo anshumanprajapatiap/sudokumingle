@@ -11,33 +11,84 @@ class ScrollableCarousel extends StatelessWidget {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirmation'),
-          content: isLive ? Text('Oppss you are late content is not live') : Text('Do you want to play this Game?'),
-          actions: isLive
-              ? [
-                  TextButton(
-                    child: Text('Go Back'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+        return Dialog(
+          insetAnimationCurve: Curves.bounceOut,
+          insetAnimationDuration: const Duration(milliseconds: 100),
+          backgroundColor: Theme.of(context).secondaryHeaderColor, // Set your desired background color here
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(height: 40,),
+                Text(
+                  'Confirmation',
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize:  28
                   ),
-                ]
-              : [
-                  TextButton(
-                    child: Text('No'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  TextButton(
-                    child: Text('Yes'),
-                    onPressed: () {
-                      // Handle "Yes" button click here
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
+                ),
+                SizedBox(height: 40,),
+                isLive
+                    ? Text(
+                      'Oppss you are late content is not live',
+                      style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.normal,
+                          fontSize:  18,
+                      ),
+                    )
+                    : Text(
+                      'Do you want to play this Game?',
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.normal,
+                            fontSize:  18
+                        ),
+                      ),
+                SizedBox(height: 40,),
+                isLive
+                    ? TextButton(
+                      child: Text(
+                          'Go Back',
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.normal,
+                            fontSize:  18
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    )
+                    : Row(
+                      children: [
+                        TextButton(
+                          child: Text('No'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        TextButton(
+                          child: Text('Yes'),
+                          onPressed: () {
+                            // Handle "Yes" button click here
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    ),
+
+
+              ]
+            ),
+          )
         );
       },
     );
