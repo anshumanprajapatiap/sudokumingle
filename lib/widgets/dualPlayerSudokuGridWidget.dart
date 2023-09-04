@@ -174,7 +174,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
 
       if (sudokuGridCorrect[activeCellRow!][activeCellCol!] != number) {
         playAlertSound();
-        print('alert_sound');
+        // print('alert_sound');
         setState(() {
           numberOfMistakes++;
         });
@@ -189,7 +189,7 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
       numberOfEmptyCell = numberOfEmptyCell - 1;
       fillCell(activeCellRow!, activeCellCol!, number);
       if(numberOfEmptyCell==0){
-        print('gameOver');
+        // print('gameOver');
         firebaseGlobalMethodActiveGamePoolUtil.thisPlayerWonTheGame(widget.playerId1, widget.playerId2, widget.isPlayer1, scoreTillNow, numberOfMistakes, widget.activeGameId);
       }
       else{
@@ -200,19 +200,27 @@ class _DualPlayerSudokuGridWidgetState extends State<DualPlayerSudokuGridWidget>
 
   void counterStartStop() async{
 
-    await Future.delayed(Duration(seconds: 1), () {print('deplayed for 3');});
+    await Future.delayed(Duration(seconds: 1), () {
+      // print('deplayed for 3');
+    });
     setState(() {
       counter = "2";
     });
-    await Future.delayed(Duration(seconds: 1), () {print('deplayed for 2');});
+    await Future.delayed(Duration(seconds: 1), () {
+      // print('deplayed for 2');
+    });
     setState(() {
       counter = "1";
     });
-    await Future.delayed(Duration(seconds: 1), () {print('deplayed for 1');});
+    await Future.delayed(Duration(seconds: 1), () {
+      // print('deplayed for 1');
+    });
     setState(() {
       counter = "GO!";
     });
-    await Future.delayed(Duration(seconds: 1), () {print('deplayed for GO');});
+    await Future.delayed(Duration(seconds: 1), () {
+      // print('deplayed for GO');
+    });
     setState(() {
       isCounter = false;
     });

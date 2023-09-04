@@ -89,7 +89,7 @@ void main() {
   Map<String, dynamic> rtn =
   SudokuGenerators.generateSudoku('medium');
 
-  printGrid(rtn['correctSudoku']);
-  printGrid(rtn['toBeSolvedSudoku']);
-  print(rtn['difficulty']);
+  // printGrid(rtn['correctSudoku']);
+  // printGrid(rtn['toBeSolvedSudoku']);
+  // print(rtn['difficulty']);
 }

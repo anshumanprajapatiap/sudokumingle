@@ -5,13 +5,13 @@ class DarkThemePreference {
   bool? _savedTheme;
   setDarkTheme(bool value) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    print('THEME_SAVED ${value}');
+    // print('THEME_SAVED ${value}');
     prefs.setBool(THEME_STATUS, value);
   }
   getSavedThemeData() async{
     SharedPreferences prefs =  await SharedPreferences.getInstance();
-    print('THEME_STATUS IS: ');
-    print(prefs.getBool(THEME_STATUS));
+    // print('THEME_STATUS IS: ');
+    // print(prefs.getBool(THEME_STATUS));
     if(prefs.getBool(THEME_STATUS)==null){
       _savedTheme = false;
       return;
@@ -21,7 +21,7 @@ class DarkThemePreference {
 
   bool? getTheme()  {
     getSavedThemeData();
-    print('savedthemeatgettheme: ${_savedTheme}');
+    // print('savedthemeatgettheme: ${_savedTheme}');
     return _savedTheme;
   }
 }

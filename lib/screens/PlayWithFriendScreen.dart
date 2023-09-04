@@ -538,7 +538,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
       'isFirst': false,
     };
     activeRoomInPoolCollection.doc(rId).update(updatePlayer2Data);
-    print('GameStarted Init');
+    // print('GameStarted Init');
     // setState(() {
     //   _isGameInit = false;
     // });
@@ -568,7 +568,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
 
   fetchSudokuData(BuildContext ctx, String gameId){
     final firebaseGamePoolProvider = Provider.of<FirebaseGamePoolProvider>(context, listen: false);
-    print('fetched by ${currentUser!.displayName}');
+    // print('fetched by ${currentUser!.displayName}');
     firebaseGamePoolProvider.fetchPuzzleForGame(gameId);
     firebaseGamePoolProvider.gameStarted();
 
@@ -683,7 +683,7 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
                   }
                   else {
                     if(data['createdBy']!=currentUser!.uid){
-                      print(data['gameId']);
+                      // print(data['gameId']);
                       fetchSudokuData(context, data['gameId']);
                       // return UserSearchingWidget(milliSecondsDelayTime: 100, searching: true,);
                     }
@@ -784,12 +784,12 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
           .collection(Constants.ACTIVE_ROOM)
           .doc(widget.roomId)
           .delete().then((_) {
-        print('Document with roomId ${widget.roomId} deleted successfully.');
+        // print('Document with roomId ${widget.roomId} deleted successfully.');
       }).catchError((error) {
-        print('Error deleting document with roomId ${widget.roomId} : $error');
+        // print('Error deleting document with roomId ${widget.roomId} : $error');
       });
     }catch(e){
-      print('Error deleting document with roomId ${widget.roomId} : $e');
+      // print('Error deleting document with roomId ${widget.roomId} : $e');
     }
 
 

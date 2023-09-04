@@ -178,19 +178,27 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
 
   void counterStartStop() async{
 
-    await Future.delayed(Duration(seconds: 1), () {print('deplayed for 3');});
+    await Future.delayed(Duration(seconds: 1), () {
+      // print('deplayed for 3');
+    });
     setState(() {
       counter = "2";
     });
-    await Future.delayed(Duration(seconds: 1), () {print('deplayed for 2');});
+    await Future.delayed(Duration(seconds: 1), () {
+      // print('deplayed for 2');
+    });
     setState(() {
       counter = "1";
     });
-    await Future.delayed(Duration(seconds: 1), () {print('deplayed for 1');});
+    await Future.delayed(Duration(seconds: 1), () {
+      // print('deplayed for 1');
+    });
     setState(() {
       counter = "GO!";
     });
-    await Future.delayed(Duration(seconds: 1), () {print('deplayed for GO');});
+    await Future.delayed(Duration(seconds: 1), () {
+      // print('deplayed for GO');
+    });
     setState(() {
       isCounter = false;
     });
@@ -286,9 +294,9 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     sudokuGrid = widget.generatedSudoku['toBeSolvedSudoku'];
     difficultyLevel = widget.generatedSudoku['difficulty'];
     int emptyCellCount = countEmptyCells();
-    print('Number of empty cells: $emptyCellCount');
+    // print('Number of empty cells: $emptyCellCount');
     numberOfEmptyCell = emptyCellCount;
-    print('Number of empty after initializeSudoku: $numberOfEmptyCell');
+    // print('Number of empty after initializeSudoku: $numberOfEmptyCell');
   }
 
   void fillCell(int row, int col, int number) {
@@ -330,7 +338,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     if (isCellTapped && activeCellRow != null && activeCellCol != null) {
       if (sudokuGridCorrect[activeCellRow!][activeCellCol!] != number) {
         playAlertSound();
-        print('alert_sound');
+        // print('alert_sound');
         setState(() {
           numberOfMistakes++;
         });
@@ -347,7 +355,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
       numberOfEmptyCell = numberOfEmptyCell - 1;
       fillCell(activeCellRow!, activeCellCol!, number);
       if(numberOfEmptyCell==0){
-        print('gameOver');
+        // print('gameOver');
         showGameOverDialog(context);
       }
     }

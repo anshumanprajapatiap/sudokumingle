@@ -151,10 +151,10 @@ void main() {
 
   final results = sudoku.generateSudoku(validSudokuString, difficulty);
 
-
-  print("Solved Sudoku:");
-  //sudoku.printGrid(validSudokuString);
-
-  print("\nTo be Solved Sudoku (Difficulty: ${difficulty.toString().split('.')[1]}):");
-  sudoku.printGrid(results);
+  //
+  // print("Solved Sudoku:");
+  // //sudoku.printGrid(validSudokuString);
+  //
+  // print("\nTo be Solved Sudoku (Difficulty: ${difficulty.toString().split('.')[1]}):");
+  // sudoku.printGrid(results);
 }

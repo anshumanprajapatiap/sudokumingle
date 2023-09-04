@@ -36,7 +36,7 @@ class GoogleSignInProvider extends ChangeNotifier {
       await googleSignIn.signOut();
       _user = null;
       //await FirebaseAuth.instance.signOut();
-      print('logoutFrom');
+      // print('logoutFrom');
     }catch (e) {
       print('Error signing out. Try again.');
     }
@@ -65,8 +65,8 @@ class GoogleSignInProvider extends ChangeNotifier {
       // Create a new CustomeUserProfile
       final _currentUser = FirebaseAuth.instance.currentUser!;
 
-      print('currentuser->${_currentUser!.uid}');
-      print(_currentUser);
+      // print('currentuser->${_currentUser!.uid}');
+      // print(_currentUser);
 
       final userDoc = FirebaseFirestore.instance
           .collection(Constants.CUSTOM_USER_PROFILE)
@@ -76,7 +76,7 @@ class GoogleSignInProvider extends ChangeNotifier {
       if (userSnapshot.exists) {
         // Document already exists
         // You can handle the case when the document already exists
-        print('allready exist');
+        // print('allready exist');
       } else {
         // Document doesn't exist, create it
         final newUserData = {
@@ -87,7 +87,7 @@ class GoogleSignInProvider extends ChangeNotifier {
           'userAvatar': 0,
           'isPro': false,
         };
-        print('newuser');
+        // print('newuser');
         await userDoc.set(newUserData);
       }
 

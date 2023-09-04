@@ -134,7 +134,7 @@ class SudokuGeneratorAgorithmV2{
 
     final correctSudoku = sudoku.getSudokuFromString(randomString);
     final toBeSolvedSudoku = sudoku.generateSudoku(randomString, difficulty);
-    print('fromSudokuGeneratorAgorithmV2 $correctSudoku');
+    // print('fromSudokuGeneratorAgorithmV2 $correctSudoku');
     return {
       'correctSudoku': correctSudoku,
       'toBeSolvedSudoku': toBeSolvedSudoku,

@@ -11,7 +11,7 @@ class SoundProvider with ChangeNotifier {
 
   void toggleSound() {
     _isSoundOn = !_isSoundOn;
-    print('somodeund: -${_isSoundOn}');
+    // print('somodeund: -${_isSoundOn}');
     soundPreference.setSound(_isSoundOn);
     notifyListeners();
   }
@@ -20,7 +20,7 @@ class SoundProvider with ChangeNotifier {
     if (soundPreference.getSound() != null) {
       _isSoundOn = soundPreference.getSound()!;
     }
-    print('getting sound');
+    // print('getting sound');
     return _isSoundOn;
   }
 

@@ -12,7 +12,7 @@ class ThemeSwitchProvider with ChangeNotifier {
 
   void toggleTheme() {
     _isDarkMode = !_isDarkMode;
-    print('mode: -${_isDarkMode}');
+    // print('mode: -${_isDarkMode}');
     darkThemePreference.setDarkTheme(_isDarkMode);
     notifyListeners();
   }
@@ -21,7 +21,7 @@ class ThemeSwitchProvider with ChangeNotifier {
     if (darkThemePreference.getTheme() != null) {
       _isDarkMode = darkThemePreference.getTheme()!;
     }
-    print('getign theme');
+    // print('getign theme');
     return _isDarkMode ? SudokuMingleTheme.darkTheme : SudokuMingleTheme.lightTheme;
   }
 
