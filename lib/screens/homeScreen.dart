@@ -14,6 +14,7 @@ import '../utils/constants.dart';
 import '../widgets/cardWidget.dart';
 import '../widgets/scrollableCarouselWidget.dart';
 import 'PlayWithFriendScreen.dart';
+import 'onlineGameLandingScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -87,8 +88,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void rewardedAdFn(){
     RewardedAd.load(
-        adUnitId: adMobUtility.developmentRewardedAdUnitId,
-        request: const AdRequest(),
+        adUnitId: adMobUtility.productionRewardedAdUnitId,
+        request: const AdRequest(
+            keywords: ['game', 'rewarded', '30 seconds'],
+            httpTimeoutMillis: 30,
+            nonPersonalizedAds: true,
+        ),
         rewardedAdLoadCallback: RewardedAdLoadCallback(
             onAdLoaded: (ad){
 
@@ -391,6 +396,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           ElevatedButton(
                             onPressed: () {
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(builder: (context) => OnlineGameLandingScreen()),
+                              // );
                               if(firebaseUserDataProvider.getUserData['coins'] <= 0){
                                 // showAdDialog(context);
                                 showRewardedAd(context);

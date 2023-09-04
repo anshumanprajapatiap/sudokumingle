@@ -180,7 +180,7 @@ class FirebaseUserDataProvider with ChangeNotifier {
     await documentReference.update({
       'mingleCoins': _userData['coins']
     });
-
+    setCustomUserProfileDataRank();
     notifyListeners();
   }
 

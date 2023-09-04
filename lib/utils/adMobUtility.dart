@@ -9,13 +9,13 @@ class AdMobUtility{
   String productionCoinWinAdUnitId = '{makingerror}ca-app-pub-1710164244221834/8384403504';
   String developmentCoinWinAdUnitId = 'ca-app-pub-3940256099942544/1033173712';
 
-
+  String productionRewardedAdUnitId  = '{makingerror}ca-app-pub-1710164244221834/9171474207';
   String developmentRewardedAdUnitId = 'ca-app-pub-3940256099942544/5224354917';
 
   BannerAd bottomBarAd(){
     BannerAd bannerAd = BannerAd(
         size: AdSize.banner,
-        adUnitId: developmentBottomBannerAdUnitId,
+        adUnitId: productionBottomBannerAdUnitId,
         listener: BannerAdListener(
             onAdLoaded: (ad) {
               // setState(() {
@@ -36,7 +36,7 @@ class AdMobUtility{
   BannerAd largeBannerAd(){
     BannerAd bannerAd = BannerAd(
         size: AdSize.mediumRectangle,
-        adUnitId: developmentBottomBannerAdUnitId,
+        adUnitId: productionBottomBannerAdUnitId,
         listener: BannerAdListener(
             onAdLoaded: (ad) {
               // setState(() {
@@ -58,7 +58,7 @@ class AdMobUtility{
   InterstitialAd winCoinAd(){
 
     InterstitialAd.load(
-        adUnitId: developmentCoinWinAdUnitId,
+        adUnitId: productionCoinWinAdUnitId,
         request: const AdRequest(),
         adLoadCallback: InterstitialAdLoadCallback(
             onAdLoaded: (ad){

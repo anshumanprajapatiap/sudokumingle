@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:sudokumingle/providers/firebaseGamePoolProvider.dart';
 import 'package:sudokumingle/utils/globalMethodUtil.dart';
@@ -16,6 +17,7 @@ import '../providers/firebaseRoomManagementProvider.dart';
 import '../providers/firebaseUserDataProvider.dart';
 import '../providers/firebaseUserDataProvider.dart';
 import '../utils/SudokuBoardEnums.dart';
+import '../utils/adMobUtility.dart';
 import '../utils/constants.dart';
 import '../utils/sudokuGeneratorNewAlgorithm.dart';
 import '../widgets/liveUserWidget.dart';
@@ -577,11 +579,36 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
     firebaseGamePoolProvider.updateCounterStatus();
   }
 
+  AdMobUtility adMobUtility = AdMobUtility();
+  late InterstitialAd interstitialAd;
+  late BannerAd bannerAd;
+  initBannerAd(){
+    bannerAd = adMobUtility.bottomBarAd();
+    bannerAd.load();
+  }
+
+
+  void initGameEndAd(){
+
+    InterstitialAd.load(
+      adUnitId: adMobUtility.productionCoinWinAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad){
+          interstitialAd = ad;
+        },
+        onAdFailedToLoad: ((error) {
+          interstitialAd.dispose();
+        }),
+      ),
+    );
+  }
 
   @override
   void dispose() {
     // searchTimer?.cancel();
     deleteFromActiveGamePool();
+    interstitialAd.show();
     WidgetsBinding.instance?.removeObserver(this);
     //super.dispose();
   }
@@ -590,7 +617,8 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
     // TODO: implement initState
     difficulty = DifficultyEnumToString(widget.difficultyLevel).name;
     super.initState();
-
+    initBannerAd();
+    initGameEndAd();
     WidgetsBinding.instance?.addObserver(this);
   }
 
@@ -731,13 +759,9 @@ class _PlayWithFriendScreenState extends State<PlayWithFriendScreen> with Widget
       ),
 
       bottomNavigationBar: SizedBox(
-        height: MediaQuery.of(context).size.height*0.1,
-        child: Container(
-          color: Theme.of(context).primaryColor,
-          child: const Center(
-              child: Text('')
-          ),
-        ),
+        height: bannerAd.size.height.toDouble(),
+        width: bannerAd.size.width.toDouble(),
+        child: AdWidget(ad: bannerAd),
       ),
     );
 
