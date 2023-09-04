@@ -88,7 +88,7 @@ class SudokuGenerator {
         emptyCells = 0;
         break;
       case Difficulty.easy:
-        emptyCells = 2;
+        emptyCells = 30;
         break;
       case Difficulty.medium:
         emptyCells = 40;
