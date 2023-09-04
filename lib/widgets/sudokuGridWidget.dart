@@ -217,6 +217,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   void initState() {
     super.initState();
     initAudioCache();
+    initGameEndAd();
+    initBannerAd();
     startTimer();
     initializeSudoku();
     counterStartStop();
@@ -229,8 +231,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     // setState(() {
     //   _isLoading = false;
     // });
-    initGameEndAd();
-    initBannerAd();
+
   }
 
   @override
