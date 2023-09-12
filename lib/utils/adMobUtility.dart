@@ -1,16 +1,21 @@
 
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+String productionBottomBannerAdUnitIdGoodData = 'ca-app-pub-1710164244221834/9253797898';
+String productionCoinWinAdUnitIdGoodData = 'ca-app-pub-1710164244221834/8384403504';
+String productionRewardedAdUnitIdGoodData  = 'ca-app-pub-1710164244221834/9171474207';
+
+// String developmentBottomBannerAdUnitIdGoodData = 'ca-app-pub-3940256099942544/6300978111';
+// String developmentCoinWinAdUnitIdGoodData = 'ca-app-pub-3940256099942544/1033173712';
+// String developmentRewardedAdUnitIdGoodData = 'ca-app-pub-3940256099942544/5224354917';
+
+
 class AdMobUtility{
 
-  String productionBottomBannerAdUnitId = 'ca-app-pub-1710164244221834/9253797898';
-  // String developmentBottomBannerAdUnitId = 'ca-app-pub-3940256099942544/6300978111';
 
-  String productionCoinWinAdUnitId = 'ca-app-pub-1710164244221834/8384403504';
-  // String developmentCoinWinAdUnitId = 'ca-app-pub-3940256099942544/1033173712';
-
-  String productionRewardedAdUnitId  = 'ca-app-pub-1710164244221834/9171474207';
-  // String developmentRewardedAdUnitId = 'ca-app-pub-3940256099942544/5224354917';
+  String productionBottomBannerAdUnitId = productionBottomBannerAdUnitIdGoodData;
+  String productionCoinWinAdUnitId = productionCoinWinAdUnitIdGoodData;
+  String productionRewardedAdUnitId = productionRewardedAdUnitIdGoodData;
 
   BannerAd bottomBarAd(){
     BannerAd bannerAd = BannerAd(
