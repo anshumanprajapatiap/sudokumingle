@@ -11,6 +11,7 @@ import 'package:sudokumingle/providers/firebaseRoomManagementProvider.dart';
 import 'package:sudokumingle/providers/firebaseUserDataProvider.dart';
 import 'package:sudokumingle/providers/googleSignInProvider.dart';
 import 'package:sudokumingle/providers/soundProvider.dart';
+import 'package:sudokumingle/screens/authScreen.dart';
 import 'package:sudokumingle/screens/bottomNavigationBar.dart';
 import 'package:sudokumingle/screens/splashScreen.dart';
 
@@ -69,11 +70,13 @@ class _MyAppState extends State<MyApp> {
                   color: Theme.of(context).primaryColor,
                 );
               } else if (snapshot.hasData) {
-                return const SplashScreen(isLoggedIn: true);
+                // return const SplashScreen(isLoggedIn: true);
+                return const TabsScreen();
               } else if (snapshot.hasError) {
                 return const Center(child: Text('Check your connection, Something Went Wrong!'));
               } else {
-                return const SplashScreen(isLoggedIn: false);
+                // return const SplashScreen(isLoggedIn: false);
+                return const AuthScreen();
               }
             },
           ),

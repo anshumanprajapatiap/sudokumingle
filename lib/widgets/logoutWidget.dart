@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sudokumingle/screens/authScreen.dart';
 import 'package:sudokumingle/screens/splashScreen.dart';
 import '../providers/googleSignInProvider.dart';
 
@@ -13,7 +14,7 @@ class LogoutWidget extends StatelessWidget {
               onPressed: () {
                 signInProvider.logoutFromGoogleAuth().then((_) {
                   Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (context) => SplashScreen(isLoggedIn: false),
+                    builder: (context) => const AuthScreen(),
                   ));
                 });
               },

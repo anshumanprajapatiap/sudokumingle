@@ -254,6 +254,20 @@ class _HomeScreenState extends State<HomeScreen> {
     return selectedDifficulty;
   }
 
+  userNotDefined(BuildContext context){
+    return AlertDialog(
+      title: Text('Not Logged In'),
+      content: Text('You need to log in to access this feature.'),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(); // Close the dialog
+          },
+          child: Text('OK'),
+        ),
+      ],
+    );
+  }
   // void showAdDialog(BuildContext context) {
   //   showDialog(
   //     context: context,
@@ -400,6 +414,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               //   context,
                               //   MaterialPageRoute(builder: (context) => OnlineGameLandingScreen()),
                               // );
+                              if(firebaseUserDataProvider.getUserData['userFirstName']==null
+                              || firebaseUserDataProvider.getUserData['userFirstName']==''){
+                                userNotDefined(context);
+                                return;
+                              }
                               if(firebaseUserDataProvider.getUserData['coins'] <= 0){
                                 // showAdDialog(context);
                                 showRewardedAd(context);
