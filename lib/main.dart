@@ -70,13 +70,13 @@ class _MyAppState extends State<MyApp> {
                   color: Theme.of(context).primaryColor,
                 );
               } else if (snapshot.hasData) {
-                // return const SplashScreen(isLoggedIn: true);
-                return const TabsScreen();
+                return const SplashScreen(isLoggedIn: true);
+                // return const TabsScreen();
               } else if (snapshot.hasError) {
                 return const Center(child: Text('Check your connection, Something Went Wrong!'));
               } else {
-                // return const SplashScreen(isLoggedIn: false);
-                return const AuthScreen();
+                return const SplashScreen(isLoggedIn: false);
+                // return const AuthScreen();
               }
             },
           ),

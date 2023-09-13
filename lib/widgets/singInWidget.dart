@@ -25,7 +25,7 @@ class _GoogleSignInWidgetState extends State<GoogleSignInWidget> {
               onPressed: () {
                 googleSignInProvider.signInWithGoogleAuth().then((_) {
                   Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (context) => const TabsScreen(),
+                    builder: (context) => const SplashScreen(isLoggedIn: true),
                   ));
                 });
               },

@@ -14,7 +14,7 @@ class LogoutWidget extends StatelessWidget {
               onPressed: () {
                 signInProvider.logoutFromGoogleAuth().then((_) {
                   Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (context) => const AuthScreen(),
+                    builder: (context) => const SplashScreen(isLoggedIn: false),
                   ));
                 });
               },
