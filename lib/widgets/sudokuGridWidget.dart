@@ -8,15 +8,12 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:sudokumingle/model/gameHistoryModel.dart';
 import 'package:sudokumingle/providers/darkThemeProvider.dart';
-import 'package:sudokumingle/screens/homeScreen.dart';
 import 'package:sudokumingle/screens/praticeOfflineScreen.dart';
 import 'package:sudokumingle/utils/SudokuBoardEnums.dart';
-import 'package:sudokumingle/utils/constants.dart';
+import 'package:vibration/vibration.dart';
 
-import '../main.dart';
 import '../providers/firebaseUserDataProvider.dart';
 import '../utils/adMobUtility.dart';
-import '../utils/globalMethodUtil.dart';
 
 class SudokuGridWidget extends StatefulWidget {
   final Map<String, dynamic> generatedSudoku;
@@ -50,6 +47,10 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   //   player.play('audio/alert_sound.mp3');
   // }
 
+  void handleVibration() {
+    // Vibrate for 500 milliseconds
+    Vibration.vibrate(duration: 1000);
+  }
 
   AdMobUtility adMobUtility = AdMobUtility();
   late InterstitialAd interstitialAd;
@@ -57,7 +58,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   late BannerAd gameOver;
   late BannerAd mistakes;
 
-  initBannerAd(){
+  initBannerAd() {
     pauseBox = adMobUtility.largeBannerAd();
     pauseBox.load();
     gameOver = adMobUtility.largeBannerAd();
@@ -66,13 +67,12 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     mistakes.load();
   }
 
-  void initGameEndAd(){
-
+  void initGameEndAd() {
     InterstitialAd.load(
       adUnitId: adMobUtility.productionCoinWinAdUnitId,
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad){
+        onAdLoaded: (ad) {
           interstitialAd = ad;
         },
         onAdFailedToLoad: ((error) {
@@ -94,15 +94,17 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     return emptyCellCount;
   }
 
-  List<List<Color>> sudokuGridColors = List.generate(9, (_) => List.filled(9, Colors.transparent));
+  List<List<Color>> sudokuGridColors =
+      List.generate(9, (_) => List.filled(9, Colors.transparent));
   List<List<int?>> sudokuGrid = List.generate(9, (_) => List.filled(9, null));
-  List<List<int>> sudokuGridCorrect = List.generate(9, (_) => List.filled(9, 0));
+  List<List<int>> sudokuGridCorrect =
+      List.generate(9, (_) => List.filled(9, 0));
   int? activeCellRow;
   int? activeCellCol;
   bool isPaused = false;
   Stopwatch stopwatch = Stopwatch();
   bool isCellTapped = false;
-  bool isNonActiveIsActive= false;
+  bool isNonActiveIsActive = false;
 
   Difficulty? difficultyLevel;
   int numberOfMistakes = 0;
@@ -127,7 +129,9 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
   void setNonActiveCell(int row, int col, int val, bool isDarkMode) {
     setState(() {
       isNonActiveIsActive = true;
-      final tappedColor = isDarkMode ? Colors.blueGrey : Colors.blueGrey.shade100; // Change to the desired shade of grey
+      final tappedColor = isDarkMode
+          ? Colors.blueGrey
+          : Colors.blueGrey.shade100; // Change to the desired shade of grey
 
       // Update colors of the row and column
       for (int i = 0; i < 9; i++) {
@@ -143,9 +147,9 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
           sudokuGridColors[i][j] = tappedColor;
         }
       }
-      for(int i=0; i<9; i++){
-        for(int j=0; j<9; j++){
-          if(val == sudokuGrid[i][j]) sudokuGridColors[i][j] = tappedColor;
+      for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+          if (val == sudokuGrid[i][j]) sudokuGridColors[i][j] = tappedColor;
         }
       }
       sudokuGridColors[row][col] = isDarkMode ? Colors.black12 : Colors.white;
@@ -157,17 +161,18 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
       activeCellRow = null;
       activeCellCol = null;
       isCellTapped = false;
-      if(isNonActiveIsActive){
-        sudokuGridColors = List.generate(9, (_) => List.filled(9, Colors.transparent));
+      if (isNonActiveIsActive) {
+        sudokuGridColors =
+            List.generate(9, (_) => List.filled(9, Colors.transparent));
       }
-
     });
   }
 
   void resetNonActiveCell() {
     setState(() {
-      isNonActiveIsActive= false;
-      sudokuGridColors = List.generate(9, (_) => List.filled(9, Colors.transparent));
+      isNonActiveIsActive = false;
+      sudokuGridColors =
+          List.generate(9, (_) => List.filled(9, Colors.transparent));
     });
   }
 
@@ -175,9 +180,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     return sudokuGrid[row][col] == null;
   }
 
-
-  void counterStartStop() async{
-
+  void counterStartStop() async {
     await Future.delayed(Duration(seconds: 1), () {
       // print('deplayed for 3');
     });
@@ -211,8 +214,6 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     });
   }
 
-
-
   @override
   void initState() {
     super.initState();
@@ -231,33 +232,32 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     // setState(() {
     //   _isLoading = false;
     // });
-
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-      if (state == AppLifecycleState.paused) {
-        pauseTimer();
-        if (numberOfMistakes >= 3) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => buildMaxMistakesDialog(),
-          ).then((value) {
-            Navigator.of(context).pop();
-          });
-        } else if (isPaused) {
-          // showDialog(
-          //   context: context,
-          //   barrierDismissible: false,
-          //   builder: (context) => showPauseDialog(context),
-          // );
-          showPauseDialog(context);
-        }
+    if (state == AppLifecycleState.paused) {
+      pauseTimer();
+      if (numberOfMistakes >= 3) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => buildMaxMistakesDialog(),
+        ).then((value) {
+          Navigator.of(context).pop();
+        });
+      } else if (isPaused) {
+        // showDialog(
+        //   context: context,
+        //   barrierDismissible: false,
+        //   builder: (context) => showPauseDialog(context),
+        // );
+        showPauseDialog(context);
       }
-      // else if (state == AppLifecycleState.resumed) {
-      //   resumeTimer();
-      // }
+    }
+    // else if (state == AppLifecycleState.resumed) {
+    //   resumeTimer();
+    // }
   }
 
   @override
@@ -325,7 +325,6 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
       stopwatch.stop();
     });
     showPauseDialog(context);
-
   }
 
   void resumeTimer() {
@@ -339,6 +338,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     if (isCellTapped && activeCellRow != null && activeCellCol != null) {
       if (sudokuGridCorrect[activeCellRow!][activeCellCol!] != number) {
         playAlertSound();
+        handleVibration();
         // print('alert_sound');
         setState(() {
           numberOfMistakes++;
@@ -355,7 +355,7 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
       scoreTillNow = scoreTillNow + number;
       numberOfEmptyCell = numberOfEmptyCell - 1;
       fillCell(activeCellRow!, activeCellCol!, number);
-      if(numberOfEmptyCell==0){
+      if (numberOfEmptyCell == 0) {
         // print('gameOver');
         showGameOverDialog(context);
       }
@@ -366,7 +366,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     return Dialog(
       insetAnimationCurve: Curves.bounceOut,
       insetAnimationDuration: const Duration(milliseconds: 100),
-      backgroundColor: Theme.of(context).secondaryHeaderColor, // Set your desired background color here
+      backgroundColor: Theme.of(context)
+          .secondaryHeaderColor, // Set your desired background color here
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8.0),
       ),
@@ -377,32 +378,37 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 20,),
+            const SizedBox(
+              height: 20,
+            ),
             Text(
               'Maximum Mistakes Reached',
               style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).primaryColor
-              ),
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor),
             ),
-            const SizedBox(height: 20,),
+            const SizedBox(
+              height: 20,
+            ),
             Text(
               'You have made 3 mistakes. Do you want to restart the game or go back?',
               style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor
-              ),
+                  color: Theme.of(context).primaryColor),
             ),
-
-            const SizedBox(height: 20,),
+            const SizedBox(
+              height: 20,
+            ),
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.3,
               width: mistakes.size.width.toDouble(),
               child: AdWidget(ad: mistakes),
             ),
-            const SizedBox(height: 20,),
+            const SizedBox(
+              height: 20,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -411,17 +417,21 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                     // Restart game
                     Navigator.pop(context);
                     Navigator.pop(context);
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => PraticeOfflineSudokuScreen(difficultyLevel: difficultyLevel as Difficulty,))
-                    );
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => PraticeOfflineSudokuScreen(
+                                  difficultyLevel:
+                                      difficultyLevel as Difficulty,
+                                )));
                   },
-                  child: Text(''
-                      'Restart',
+                  child: Text(
+                    ''
+                    'Restart',
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor
-                    ),
+                        color: Theme.of(context).primaryColor),
                   ),
                 ),
                 TextButton(
@@ -435,12 +445,14 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor
-                    ),),
+                        color: Theme.of(context).primaryColor),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 20,),
+            const SizedBox(
+              height: 20,
+            ),
           ],
         ),
       ),
@@ -462,7 +474,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
               child: Dialog(
                 insetAnimationCurve: Curves.bounceOut,
                 insetAnimationDuration: const Duration(milliseconds: 100),
-                backgroundColor: Theme.of(context).secondaryHeaderColor, // Set your desired background color here
+                backgroundColor: Theme.of(context)
+                    .secondaryHeaderColor, // Set your desired background color here
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -471,97 +484,99 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(height: 20,),
-                    Text('Game Over',
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      'Game Over',
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                        fontSize: 30
-                      ),
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 30),
                     ),
                     numberOfEmptyCell == 0
-                        ? Text('You Won',
+                        ? Text(
+                            'You Won',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Theme.of(context).primaryColor,
-                                fontSize: 15
-                            ),
+                                fontSize: 15),
                           )
-                        :  Text('You Lose',
+                        : Text(
+                            'You Lose',
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Theme.of(context).primaryColor,
-                                fontSize: 15
-                            ),
+                                fontSize: 15),
                           ),
 
-                    SizedBox(height: 20,),
+                    SizedBox(
+                      height: 20,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Column(
                           children: [
-                            Text('Mistakes',
+                            Text(
+                              'Mistakes',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Theme.of(context).primaryColor,
-                                  fontSize: 15
-                              ),
+                                  fontSize: 15),
                             ),
-                            Text('$numberOfMistakes/3',
+                            Text(
+                              '$numberOfMistakes/3',
                               style: TextStyle(
-                                  color: numberOfMistakes>=1
+                                  color: numberOfMistakes >= 1
                                       ? Colors.redAccent
                                       : Theme.of(context).primaryColor,
-                                  fontSize: 15
-                              ),
+                                  fontSize: 15),
                             ),
                           ],
                         ),
                         const SizedBox(width: 20),
                         Column(
                           children: [
-                            Text('Time',
+                            Text(
+                              'Time',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Theme.of(context).primaryColor,
-                                  fontSize: 15
-                              ),
+                                  fontSize: 15),
                             ),
-                            Text('${_formatElapsedTime(elapsedTime)}',
+                            Text(
+                              '${_formatElapsedTime(elapsedTime)}',
                               style: TextStyle(
-
                                   color: Theme.of(context).primaryColor,
-                                  fontSize: 15
-                              ),
-
+                                  fontSize: 15),
                             ),
                           ],
                         ),
                         const SizedBox(width: 20),
                         Column(
                           children: [
-                            Text('Difficulty',
+                            Text(
+                              'Difficulty',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Theme.of(context).primaryColor,
-                                  fontSize: 15
-                              ),
+                                  fontSize: 15),
                             ),
-                            Text('${difficultyLevel?.name}',
+                            Text(
+                              '${difficultyLevel?.name}',
                               style: TextStyle(
-
                                   color: Theme.of(context).primaryColor,
-                                  fontSize: 15
-                              ),
-
+                                  fontSize: 15),
                             ),
                           ],
                         ),
                       ],
                     ),
                     // Image of 150x150
-                    SizedBox(height: 20,),
+                    SizedBox(
+                      height: 20,
+                    ),
 
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.3,
@@ -569,7 +584,9 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                       child: AdWidget(ad: mistakes),
                     ),
 
-                    SizedBox(height: 20,),
+                    SizedBox(
+                      height: 20,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -580,35 +597,40 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                             Navigator.pop(context);
                             Navigator.pop(context);
                           },
-                          child: Text('Exit',
+                          child: Text(
+                            'Exit',
                             style: TextStyle(
-                              color: Theme.of(context).primaryColor
-                            ),
+                                color: Theme.of(context).primaryColor),
                           ),
                         ),
                         ElevatedButton(
                           style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)
-                          ),
+                              backgroundColor: MaterialStateProperty.all(
+                                  Theme.of(context).primaryColor)),
                           onPressed: () {
                             // Resume game
                             saveGameToUserHistory();
                             Navigator.pop(context);
                             Navigator.pop(context);
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (_) => PraticeOfflineSudokuScreen(difficultyLevel: difficultyLevel as Difficulty,))
-                            );
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => PraticeOfflineSudokuScreen(
+                                          difficultyLevel:
+                                              difficultyLevel as Difficulty,
+                                        )));
                           },
-                          child: Text('Play Again',
+                          child: Text(
+                            'Play Again',
                             style: TextStyle(
-                                color: Theme.of(context).secondaryHeaderColor
-                            ),
+                                color: Theme.of(context).secondaryHeaderColor),
                           ),
                         ),
-
                       ],
                     ),
-                    SizedBox(height: 20,),
+                    SizedBox(
+                      height: 20,
+                    ),
                   ],
                 ),
               ),
@@ -636,7 +658,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
               child: Dialog(
                 insetAnimationCurve: Curves.bounceOut,
                 insetAnimationDuration: const Duration(milliseconds: 100),
-                backgroundColor: Theme.of(context).secondaryHeaderColor, // Set your desired background color here
+                backgroundColor: Theme.of(context)
+                    .secondaryHeaderColor, // Set your desired background color here
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -649,12 +672,12 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const SizedBox(height: 30),
-                        Text('Paused',
+                        Text(
+                          'Paused',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor,
-                            fontSize: 28
-                          ),
+                              color: Theme.of(context).primaryColor,
+                              fontSize: 28),
                         ),
                         const SizedBox(height: 30),
                         Row(
@@ -662,66 +685,63 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                           children: [
                             Column(
                               children: [
-                                Text('Mistakes',
+                                Text(
+                                  'Mistakes',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Theme.of(context).primaryColor,
-                                      fontSize: 15
-                                  ),
+                                      fontSize: 15),
                                 ),
-                                Text('$numberOfMistakes/3',
+                                Text(
+                                  '$numberOfMistakes/3',
                                   style: TextStyle(
-
                                       color: Theme.of(context).primaryColor,
-                                      fontSize: 15
-                                  ),
+                                      fontSize: 15),
                                 ),
                               ],
                             ),
                             const SizedBox(width: 20),
                             Column(
                               children: [
-                                 Text('Time',
+                                Text(
+                                  'Time',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Theme.of(context).primaryColor,
-                                      fontSize: 15
-                                  ),
+                                      fontSize: 15),
                                 ),
-                                Text('${_formatElapsedTime(elapsedTime)}',
+                                Text(
+                                  '${_formatElapsedTime(elapsedTime)}',
                                   style: TextStyle(
-
                                       color: Theme.of(context).primaryColor,
-                                      fontSize: 15
-                                  ),
-
+                                      fontSize: 15),
                                 ),
                               ],
                             ),
                             const SizedBox(width: 20),
                             Column(
                               children: [
-                                 Text('Difficulty',
+                                Text(
+                                  'Difficulty',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Theme.of(context).primaryColor,
-                                      fontSize: 15
-                                  ),
+                                      fontSize: 15),
                                 ),
-                                Text('${difficultyLevel?.name}',
+                                Text(
+                                  '${difficultyLevel?.name}',
                                   style: TextStyle(
-
                                       color: Theme.of(context).primaryColor,
-                                      fontSize: 15
-                                  ),
-
+                                      fontSize: 15),
                                 ),
                               ],
                             ),
                           ],
                         ),
                         // Image of 150x150
-                        const SizedBox(height: 20,),
+                        const SizedBox(
+                          height: 20,
+                        ),
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.3,
                           width: pauseBox.size.width.toDouble(),
@@ -736,7 +756,9 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                         // )
                       ],
                     ),
-                    const SizedBox(height: 20,),
+                    const SizedBox(
+                      height: 20,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -751,24 +773,23 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                           },
                           child: Text('Exit',
                               style: TextStyle(
-                                  color: Theme.of(context).primaryColor
-                              )
-                          ),
+                                  color: Theme.of(context).primaryColor)),
                         ),
                         ElevatedButton(
                           style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(Theme.of(context).primaryColor)
-                          ),
+                              backgroundColor: MaterialStateProperty.all(
+                                  Theme.of(context).primaryColor)),
                           onPressed: () {
                             // Resume game
                             Navigator.pop(context);
                             resumeTimer();
                           },
-                          child: Text('Resume', style: TextStyle(
-                            color: Theme.of(context).secondaryHeaderColor
-                          ),),
+                          child: Text(
+                            'Resume',
+                            style: TextStyle(
+                                color: Theme.of(context).secondaryHeaderColor),
+                          ),
                         ),
-
                       ],
                     ),
                     const SizedBox(height: 30),
@@ -782,40 +803,36 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
     );
   }
 
-  void saveGameToUserHistory(){
-    final userDataProvider = Provider.of<FirebaseUserDataProvider>(context, listen: false);
+  void saveGameToUserHistory() {
+    final userDataProvider =
+        Provider.of<FirebaseUserDataProvider>(context, listen: false);
     // Duration duration;
     // DateTime endedDateTime = createdAtDateTime.add(timer);
     // Timestamp endedAt = Timestamp.fromDate(endedDateTime);
     bool _isGameCompleted = false;
-    if(numberOfMistakes != 3 && numberOfEmptyCell==0){
+    if (numberOfMistakes != 3 && numberOfEmptyCell == 0) {
       _isGameCompleted = true;
     }
     GameHistoryModel gameData = GameHistoryModel(
-        gameId: createdAt.toString(),
-        playerId1: currentUser!.uid,
-        playerId2: '',
-        difficultyLevel: difficultyLevel!.name,
-        winnerId: _isGameCompleted ? currentUser!.uid : '',
-        createdAt: createdAt,
-        endedAt: Timestamp.now(),
-        player1Points: scoreTillNow,
-        player2Points: 0,
-        player1Mistake: numberOfMistakes,
-        player2Mistake: 0,
-        createdBy: currentUser!.uid,
+      gameId: createdAt.toString(),
+      playerId1: currentUser!.uid,
+      playerId2: '',
+      difficultyLevel: difficultyLevel!.name,
+      winnerId: _isGameCompleted ? currentUser!.uid : '',
+      createdAt: createdAt,
+      endedAt: Timestamp.now(),
+      player1Points: scoreTillNow,
+      player2Points: 0,
+      player1Mistake: numberOfMistakes,
+      player2Mistake: 0,
+      createdBy: currentUser!.uid,
     );
 
     userDataProvider.addUserGameHistory(gameData, isMultiplayer: false);
-
-
   }
-
-
 
   @override
   Widget build(BuildContext context) {
-
     final themeProvider = Provider.of<ThemeSwitchProvider>(context);
 
     return WillPopScope(
@@ -825,178 +842,193 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
       },
       child: isCounter
           ? Scaffold(
-            body: Center(
-              child: Text(
-                counter,
-                style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize:  30
+              body: Center(
+                child: Text(
+                  counter,
+                  style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 30),
                 ),
               ),
-            ),
-          )
+            )
           : Scaffold(
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text(difficultyLevel!.name,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor
-                      ),
-                    ),
-                    Text('Score: $scoreTillNow',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor
-                      ),
-                    ),
-                    Text('Mistakes: $numberOfMistakes/3',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor
-                      ),
-                    ),
-                    TextButton.icon(
-                      onPressed: isPaused ? resumeTimer : pauseTimer,
-                      label: Text(
-                        _formatElapsedTime(elapsedTime),
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor
-                        ),
-                      ),
-                      icon: Icon(
-                          isPaused ? Icons.play_arrow : Icons.pause,
-                          weight: 700,
-                          color: Theme.of(context).primaryColor
-                      ),
-                    ),
-                  ],
-                ),
-                //SizedBox(height: 8),
-
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: 81,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 9,
-                    ),
-                    itemBuilder: (context, index) {
-                      final row = index ~/ 9;
-                      final col = index % 9;
-                      final cellValue = sudokuGrid[row][col];
-                      final editableCell = isEditableCell(row, col);
-                      final isActiveCell = activeCellRow == row && activeCellCol == col;
-
-
-                      final isBoldCellColumn = col==0 || col == 3 || col == 6 ;
-                      final isBoldCellRow = row == 0  || row == 3 || row == 6;
-                      final rowNumberEight = row == 8;
-                      final columnNumberEight = col == 8;
-                      final borderColor = isBoldCellColumn || isBoldCellRow || rowNumberEight || columnNumberEight
-                          ? themeProvider.isDarkMode ? Colors.white : Colors.black
-                          : themeProvider.isDarkMode ? Colors.blueGrey.shade400 : Colors.blueGrey;
-
-                      final tappedColor = themeProvider.isDarkMode ? Colors.blueGrey.shade400 : Colors.blueGrey.shade100; // Change this to the desired color
-
-                      Color cellColor = isActiveCell ? Colors.blueGrey : Colors.grey.withOpacity(0.1);
-                      cellColor = isNonActiveIsActive ? sudokuGridColors[row][col]: cellColor;
-                      if (!editableCell && isActiveCell) {
-                        cellColor = tappedColor;
-                      } else if (!editableCell) {
-                        cellColor = cellColor; // Change this to the desired background color
-                      }
-
-
-
-                      return GestureDetector(
-                        onTap: () {
-                          if (editableCell) {
-                            if (isActiveCell) {
-                              resetActiveCell();
-                            } else {
-                              setState(() {
-                                setActiveCell(row, col);
-                              });
-                            }
-                          }
-                          else {
-                              resetActiveCell();
-                              resetNonActiveCell();
-                              setNonActiveCell(row, col, cellValue!, themeProvider.isDarkMode);
-                          }
-                        },
-                        child: Stack(
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  right: BorderSide(
-                                      color: columnNumberEight ? borderColor: Colors.grey.withOpacity(0.2),
-                                    width: 2
-                                  ),
-                                  left: BorderSide(
-                                      color: isBoldCellColumn ? borderColor : Colors.grey.withOpacity(0.0),
-                                      width: 2
-                                  ),
-                                  bottom: BorderSide(
-                                      color: rowNumberEight ? borderColor : Colors.grey.withOpacity(0.2),
-                                      width: 2
-                                  ),
-                                  top: BorderSide(
-                                      color: isBoldCellRow ? borderColor : Colors.grey.withOpacity(0.0),
-                                      width: 2
-                                  ),
-
-                                ),
-                                color: cellColor,
-                                // fontWeight: true ? FontWeight.bold : FontWeight.normal,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  cellValue != null ? cellValue.toString() : '',
-                                  style: TextStyle(
-                                      color: themeProvider.isDarkMode ? Colors.white : Colors.blueGrey ,
-                                      fontSize: 23
-                                  ),
-                                ),
-                              ),
-                            ),
-                            isActiveCell && editableCell
-                                ? Positioned.fill(
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    // Handle cell interaction
-                                  },
-                                ),
-                              ),
-                            )
-                                : SizedBox(),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Row(
+              body: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      //Reset
-                      /*
+                      Text(
+                        difficultyLevel!.name,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor),
+                      ),
+                      Text(
+                        'Score: $scoreTillNow',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor),
+                      ),
+                      Text(
+                        'Mistake: $numberOfMistakes/3',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: numberOfMistakes > 0
+                                ? Colors.redAccent
+                                : Theme.of(context).primaryColor),
+                      ),
+                      TextButton.icon(
+                        onPressed: isPaused ? resumeTimer : pauseTimer,
+                        label: Text(
+                          _formatElapsedTime(elapsedTime),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).primaryColor),
+                        ),
+                        icon: Icon(isPaused ? Icons.play_arrow : Icons.pause,
+                            weight: 700, color: Theme.of(context).primaryColor),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount: 81,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 9,
+                      ),
+                      itemBuilder: (context, index) {
+                        final row = index ~/ 9;
+                        final col = index % 9;
+                        final cellValue = sudokuGrid[row][col];
+                        final editableCell = isEditableCell(row, col);
+                        final isActiveCell =
+                            activeCellRow == row && activeCellCol == col;
+
+                        final isBoldCellColumn =
+                            col == 0 || col == 3 || col == 6;
+                        final isBoldCellRow = row == 0 || row == 3 || row == 6;
+                        final rowNumberEight = row == 8;
+                        final columnNumberEight = col == 8;
+                        final borderColor = isBoldCellColumn ||
+                                isBoldCellRow ||
+                                rowNumberEight ||
+                                columnNumberEight
+                            ? themeProvider.isDarkMode
+                                ? Colors.white
+                                : Colors.black
+                            : themeProvider.isDarkMode
+                                ? Colors.blueGrey.shade400
+                                : Colors.blueGrey;
+
+                        final tappedColor = themeProvider.isDarkMode
+                            ? Colors.blueGrey.shade400
+                            : Colors.blueGrey
+                                .shade100; // Change this to the desired color
+
+                        Color cellColor = isActiveCell
+                            ? Colors.blueGrey
+                            : Colors.grey.withOpacity(0.1);
+                        cellColor = isNonActiveIsActive
+                            ? sudokuGridColors[row][col]
+                            : cellColor;
+                        if (!editableCell && isActiveCell) {
+                          cellColor = tappedColor;
+                        } else if (!editableCell) {
+                          cellColor =
+                              cellColor; // Change this to the desired background color
+                        }
+
+                        return GestureDetector(
+                          onTap: () {
+                            if (editableCell) {
+                              if (isActiveCell) {
+                                resetActiveCell();
+                              } else {
+                                setState(() {
+                                  setActiveCell(row, col);
+                                });
+                              }
+                            } else {
+                              resetActiveCell();
+                              resetNonActiveCell();
+                              setNonActiveCell(row, col, cellValue!,
+                                  themeProvider.isDarkMode);
+                            }
+                          },
+                          child: Stack(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(
+                                        color: columnNumberEight
+                                            ? borderColor
+                                            : Colors.grey.withOpacity(0.2),
+                                        width: 2),
+                                    left: BorderSide(
+                                        color: isBoldCellColumn
+                                            ? borderColor
+                                            : Colors.grey.withOpacity(0.0),
+                                        width: 2),
+                                    bottom: BorderSide(
+                                        color: rowNumberEight
+                                            ? borderColor
+                                            : Colors.grey.withOpacity(0.2),
+                                        width: 2),
+                                    top: BorderSide(
+                                        color: isBoldCellRow
+                                            ? borderColor
+                                            : Colors.grey.withOpacity(0.0),
+                                        width: 2),
+                                  ),
+                                  color: cellColor,
+                                  // fontWeight: true ? FontWeight.bold : FontWeight.normal,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    cellValue != null
+                                        ? cellValue.toString()
+                                        : '',
+                                    style: TextStyle(
+                                        color: themeProvider.isDarkMode
+                                            ? Colors.white
+                                            : Colors.blueGrey,
+                                        fontSize: 23),
+                                  ),
+                                ),
+                              ),
+                              isActiveCell && editableCell
+                                  ? Positioned.fill(
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          onTap: () {
+                                            // Handle cell interaction
+                                          },
+                                        ),
+                                      ),
+                                    )
+                                  : SizedBox(),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        //Reset
+                        /*
                       TextButton(
                         onPressed: () {
                           // Handle reset button tap here
@@ -1016,8 +1048,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                       ),
                       */
 
-                      //Erase
-                      /*
+                        //Erase
+                        /*
                       TextButton(
                         onPressed: () {
                           // Handle erase button tap here
@@ -1035,8 +1067,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                         ),
                       ),*/
 
-                      //Notes
-                      /*
+                        //Notes
+                        /*
                       TextButton(
                         onPressed: () {
                           // Handle notes button tap here
@@ -1055,9 +1087,8 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                       ),
                       */
 
-
-                      //Hint
-                      /*
+                        //Hint
+                        /*
                       TextButton(
                         onPressed: () {
                           // Handle hint button tap here
@@ -1075,59 +1106,57 @@ class _SudokuGridWidgetState extends State<SudokuGridWidget>
                         ),
                       ),
                       */
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-
-                const SizedBox(height: 20),
-
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 2.0, vertical: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(9, (index) {
-                      int number = index + 1;
-                      return GestureDetector(
-                        onTap: () {
-                          fillCellWithNumber(number);
-                        },
-                        child: Container(
-                          width: MediaQuery.sizeOf(context).width/11,
-                          height: 35,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Center(
-                            child: Text(
-                              number.toString(),
-                              style: const TextStyle(
-                                  // color: Theme.of(context).secondaryHeaderColor,
-                                  color: Colors.white,
-                                  fontSize: 23, fontWeight: FontWeight.bold),
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 2.0, vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(9, (index) {
+                        int number = index + 1;
+                        return GestureDetector(
+                          onTap: () {
+                            fillCellWithNumber(number);
+                          },
+                          child: Container(
+                            width: MediaQuery.sizeOf(context).width / 11,
+                            height: 35,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Center(
+                              child: Text(
+                                number.toString(),
+                                style: const TextStyle(
+                                    // color: Theme.of(context).secondaryHeaderColor,
+                                    color: Colors.white,
+                                    fontSize: 23,
+                                    fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      }),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 20),
+                ],
+              ),
 
-                const SizedBox(height: 20),
-
-              ],
+              // bottomNavigationBar: SizedBox(
+              //   height: MediaQuery.of(context).size.height*0.1,
+              //   child: Container(
+              //     color: Theme.of(context).primaryColor,
+              //     child: Center(
+              //         child: Text('')
+              //     ),
+              //   ),
+              // ),
             ),
-
-            // bottomNavigationBar: SizedBox(
-            //   height: MediaQuery.of(context).size.height*0.1,
-            //   child: Container(
-            //     color: Theme.of(context).primaryColor,
-            //     child: Center(
-            //         child: Text('')
-            //     ),
-            //   ),
-            // ),
-          ),
     );
   }
 }

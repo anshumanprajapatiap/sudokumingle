@@ -4,7 +4,6 @@ import 'package:sudokumingle/utils/SudokuBoardEnums.dart';
 
 import '../utils/adMobUtility.dart';
 import '../utils/sudokuGeneratorNewAlgorithm.dart';
-import '../utils/sudokuGenerators.dart';
 import '../widgets/sudokuGridWidget.dart';
 
 class PraticeOfflineSudokuScreen extends StatefulWidget {
@@ -13,29 +12,29 @@ class PraticeOfflineSudokuScreen extends StatefulWidget {
   PraticeOfflineSudokuScreen({required this.difficultyLevel});
 
   @override
-  State<PraticeOfflineSudokuScreen> createState() => _PraticeOfflineSudokuScreenState();
+  State<PraticeOfflineSudokuScreen> createState() =>
+      _PraticeOfflineSudokuScreenState();
 }
 
-class _PraticeOfflineSudokuScreenState extends State<PraticeOfflineSudokuScreen> {
+class _PraticeOfflineSudokuScreenState
+    extends State<PraticeOfflineSudokuScreen> {
   Difficulty selectedDifficulty = Difficulty.easy;
   late Map<String, dynamic> su;
 
   AdMobUtility adMobUtility = AdMobUtility();
 
-
   late BannerAd bannerAd;
-  initBannerAd(){
+  initBannerAd() {
     bannerAd = adMobUtility.bottomBarAd();
     bannerAd.load();
   }
-
-
 
   @override
   void initState() {
     super.initState();
     initBannerAd();
-    selectedDifficulty = widget.difficultyLevel; // Initialize selectedDifficulty using widget.difficultyLevel
+    selectedDifficulty = widget
+        .difficultyLevel; // Initialize selectedDifficulty using widget.difficultyLevel
     final sudokuPuzzler = SudokuGeneratorAgorithmV2();
     Map<String, dynamic> res = sudokuPuzzler.generatePuzzle(selectedDifficulty);
     setState(() {
@@ -57,22 +56,6 @@ class _PraticeOfflineSudokuScreenState extends State<PraticeOfflineSudokuScreen>
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
         title: Text('Pratice Sudoku'),
-        // actions: [
-        //   IconButton(
-        //     onPressed: () {
-        //       // Handle theme change button tap here
-        //       _toggleColorOptions();
-        //     },
-        //     icon: Icon(Icons.color_lens),
-        //   ),
-        //   IconButton(
-        //     onPressed: () {
-        //       _toggleColorOptions();
-        //       // Handle settings button tap here
-        //     },
-        //     icon: Icon(Icons.settings),
-        //   ),
-        // ],
       ),
 
       // body: SudokuGridWidget(
@@ -86,7 +69,7 @@ class _PraticeOfflineSudokuScreenState extends State<PraticeOfflineSudokuScreen>
           if (_showColorOptions)
             Positioned(
               top: 0,
-              left: MediaQuery.sizeOf(context).width*0.4,
+              left: MediaQuery.sizeOf(context).width * 0.4,
               right: 0,
               child: SingleChildScrollView(
                 child: Container(
@@ -95,7 +78,9 @@ class _PraticeOfflineSudokuScreenState extends State<PraticeOfflineSudokuScreen>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      ColorOption(color: Colors.red), // Customize with your color options
+                      ColorOption(
+                          color:
+                              Colors.red), // Customize with your color options
                       ColorOption(color: Colors.blue),
                       ColorOption(color: Colors.green),
                       // ColorOption(color: Colors.red), // Customize with your color options
@@ -115,11 +100,9 @@ class _PraticeOfflineSudokuScreenState extends State<PraticeOfflineSudokuScreen>
         width: bannerAd.size.width.toDouble(),
         child: AdWidget(ad: bannerAd),
       ),
-
     );
   }
 }
-
 
 class ColorOption extends StatelessWidget {
   final Color color;

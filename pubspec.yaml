@@ -63,6 +63,9 @@ dependencies:
   fl_chart: ^0.63.0
   package_info_plus: ^4.0.1
 
+  #vibration
+  vibration: ^1.8.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
