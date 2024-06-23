@@ -2,16 +2,15 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 const int maxFailedLoadAttempts = 3;
 
-class AdMobUtility {
-  // String productionBottomBannerAdUnitId =
-  //     'ca-app-pub-1710164244221834/4902429199';
-  // String productionCoinWinAdUnitId = 'ca-app-pub-1710164244221834/5716021256';
-  // String productionRewardedAdUnitId = 'ca-app-pub-1710164244221834/4402939587';
+// String productionBottomBannerAdUnitId ='ca-app-pub-3940256099942544/6300978111';
+// String productionCoinWinAdUnitId = 'ca-app-pub-3940256099942544/1033173712';
+// String productionRewardedAdUnitId = 'ca-app-pub-3940256099942544/5224354917';
 
+class AdMobUtility {
   String productionBottomBannerAdUnitId =
-      'ca-app-pub-3940256099942544/6300978111';
-  String productionCoinWinAdUnitId = 'ca-app-pub-3940256099942544/1033173712';
-  String productionRewardedAdUnitId = 'ca-app-pub-3940256099942544/5224354917';
+      'ca-app-pub-1710164244221834/4902429199';
+  String productionCoinWinAdUnitId = 'ca-app-pub-1710164244221834/5716021256';
+  String productionRewardedAdUnitId = 'ca-app-pub-1710164244221834/4402939587';
 
   BannerAd bottomBarAd() {
     // MobileAds.instance.updateRequestConfiguration(

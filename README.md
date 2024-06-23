@@ -16,4 +16,7 @@ For help getting started with Flutter development, view the
 samples, guidance on mobile development, and a full API reference.
 
 Debug - $ keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
-Release - $ keytool -list -v -keystore upload-keystore.jks -alias upload 
+
+
+Release - $ keytool -list -v -keystore upload-keystore.jks -alias upload
+After this build app bundle
